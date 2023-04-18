@@ -170,8 +170,6 @@ def buy_stuff(button_location):
 
     global loop_count, searches, long_session_count, total_earned, missed, bought, transfer_list, total_spent, buy_time
 
-    loop_count += 1  # increase loop_count
-
     searches += 1  # increase searches_count
 
     time.sleep(random_int / 2)  # sleep a random amount of time
@@ -348,6 +346,9 @@ def reset_loop_count():
     global loop_count
     loop_count = 0
 
+def increment_loop_count():
+    global loop_count
+    loop_count += 1  # increase loop_count
 
 rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_png,launch_fifa_png,in_fifa_png,cont_local_png = image_loader()
 
@@ -372,12 +373,13 @@ def main():
         reset_loop_count() # reset to start over
         buy_stuff(plus_buy)
         recurring_prints()
-    print(loop_count)
+
 
     check_for_cancel()  # check if user wants to cancel script
     check_for_20_sec_pause()  # check if user wants to pause for 20 sec
     if loop_count == 2:
         buy_stuff(plus_bid)
+        increment_loop_count()
         recurring_prints()
 
 
@@ -385,6 +387,7 @@ def main():
     check_for_20_sec_pause()  # check if user wants to pause for 20 sec
     if loop_count == 1:
         buy_stuff(minus_buy)
+        increment_loop_count()
         recurring_prints()
 
 
@@ -392,6 +395,7 @@ def main():
     check_for_20_sec_pause()  # check if user wants to pause for 20 sec
     if loop_count == 0:
         buy_stuff(minus_bid)
+        increment_loop_count()
         recurring_prints()
 
 
