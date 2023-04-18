@@ -5,12 +5,12 @@ from PIL import Image
 import pydirectinput as pya
 logo = None
 
-radar_image = Image.open('images/radar.png')
-logo_left_img = Image.open("images/logoleft.png")
-logo_img = Image.open("images/logo.png")
-diff_img = Image.open("images/Difficulty.png")
-s_img = Image.open("images/squad_battle.png")
-npc_img = Image.open('images/npc.png')
+radar_image = Image.open('../images/radar.png')
+logo_left_img = Image.open("../images/logoleft.png")
+logo_img = Image.open("../images/logo.png")
+diff_img = Image.open("../images/Difficulty.png")
+s_img = Image.open("../images/squad_battle.png")
+npc_img = Image.open('../images/npc.png')
 y = [2]
 u = [2, 12, 25]
 Diff_location = None

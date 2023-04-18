@@ -12,8 +12,8 @@ import time
 print('yo')
 time.sleep(1)
 
-expired_png = Image.open('images/expired.png')
-AB_png = Image.open('images/AB.png')
+expired_png = Image.open('../images/expired.png')
+AB_png = Image.open('../images/AB.png')
 expired = None
 while 0 < 1:
     pyd.press('down')
