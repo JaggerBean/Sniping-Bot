@@ -12,18 +12,16 @@ import multiprocessing
 import numpy as np
 
 
-
-
-
-
 ## Currently not developed
 card_type = "Normal"
 ## END DEV
 
 
+resolution = '1440'  # resolution of main monitor
+buy_limit = 1  # set max amount of cards to snipe
 current_price = 700  # the price you want to sell at
-max_loops = 4000 # max amount of searches the code will do
-long_session=True # anti bot detection for long sessions but runs slower
+max_loops = 4000  # max amount of searches the code will do
+long_session= True  # anti bot detection for long sessions but runs slower
 ## MODES
 # set ONLY ONE of these to true at a time
 only_sell = True # always sells the players
@@ -33,7 +31,7 @@ KRSU = False # keep rares sell uncommons
 
 
 
-resolution = '1440'
+
 
 #pytesseract exe location
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -558,9 +556,11 @@ def main():
 
     ## end test
 
-
     # all global vairables needed
-    global total_spent, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int, minus_buy, minus_bid, plus_buy, plus_bid
+    global total_spent, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int, minus_buy, minus_bid, plus_buy, plus_bid, buy_limit
+
+
+
 
     if resolution == '1080':
         minus_bid = 500, 770  # coords of minus bid button
@@ -569,6 +569,9 @@ def main():
         plus_buy = 970, 880  # coords of plus buy button
 
     while True:
+        if bought >= buy_limit:
+            print("reached max purchases")
+            exit(0)
 
         teamviewer_closer()  # check for teamviewer popup and close it
 
