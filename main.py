@@ -11,6 +11,11 @@ import threading
 import multiprocessing
 import numpy as np
 
+
+
+
+
+
 ## Currently not developed
 card_type = "Normal"
 ## END DEV
@@ -28,6 +33,7 @@ KRSU = False # keep rares sell uncommons
 
 
 
+resolution = '1440'
 
 #pytesseract exe location
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -77,8 +83,12 @@ def image_loader():
     launch_fifa_png = Image.open('images/launch_fifa.png')
     in_fifa_png = Image.open('images/in_fifa.png')
     cont_local_png = Image.open('images/cont_local.png')
+    no_res_img_1080 = Image.open(('images/no_res_1080.png'))
+    failed_img_1080 = Image.open('images/fail_1080.png')
+    won_bid_img_1080 = Image.open('images/won_bid_1080.png')
+    dupe_png_1080 = Image.open('images/dupe_1080.png')
 
-    return rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_png,launch_fifa_png,in_fifa_png,cont_local_png
+    return rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_png,launch_fifa_png,in_fifa_png,cont_local_png, no_res_img_1080, failed_img_1080, won_bid_img_1080, dupe_png_1080
 
 def max_search_check():
     if total_loops >= max_loops:
@@ -93,22 +103,40 @@ def ensure_mode_selection():
 
 def clear_transfer_list(clears, transfer):
     if transfer >=20:
-        global transfer_list, TL_clears
-        print("clearing transfer list")
-        time.sleep(2)
-        pya.click(50, 440)  # transfer list left
-        time.sleep(2)
-        pya.click(1100, 740)  # transfer list mid
-        time.sleep(2)
-        pya.click(1500, 330)  # clear sold
-        time.sleep(2)
-        pya.click(125, 190)  # go back
-        time.sleep(2)
-        pya.click(1500, 450)  # back to buying
-        time.sleep(2)
-        transfer_list = 0
-        clears += 1
-        TL_clears = clears
+        global transfer_list, TL_clears, resolution
+        if resolution == '1440':
+            print("clearing transfer list")
+            time.sleep(2)
+            pya.click(50, 440)  # transfer list left
+            time.sleep(2)
+            pya.click(1100, 740)  # transfer list mid
+            time.sleep(2)
+            pya.click(1500, 330)  # clear sold
+            time.sleep(2)
+            pya.click(125, 190)  # go back
+            time.sleep(2)
+            pya.click(1500, 450)  # back to buying
+            time.sleep(2)
+            transfer_list = 0
+            clears += 1
+            TL_clears = clears
+
+        if resolution == '1080':
+            print("clearing transfer list")
+            time.sleep(2)
+            pya.click(50, 440)  # transfer list left
+            time.sleep(2)
+            pya.click(750, 740)  # transfer list mid
+            time.sleep(2)
+            pya.click(1200, 300)  # clear sold
+            time.sleep(2)
+            pya.click(125, 190)  # go back
+            time.sleep(2)
+            pya.click(1000, 450)  # back to buying
+            time.sleep(2)
+            transfer_list = 0
+            clears += 1
+            TL_clears = clears
 
 def long_session_rest(session, long):
     if session:
@@ -140,37 +168,64 @@ def teamviewer_closer():
         time.sleep(1)
 
 def sell():
-    global current_price_real_str, current_price_str
+    global current_price_real_str, current_price_str, resolution
 
-    pya.click(1750, 700)
-    time.sleep(0.5)
-    pya.click(1750, 880)
-    time.sleep(0.5)
-    pya.typewrite(current_price_real_str)
-    time.sleep(0.5)
-    pya.press('enter')
-    time.sleep(0.5)
-    pya.click(1750, 800)
-    time.sleep(0.5)
-    pya.typewrite(current_price_str)
-    time.sleep(0.5)
-    pya.press('enter')
-    time.sleep(0.5)
-    pya.click(1750, 880)
-    time.sleep(0.5)
-    pya.typewrite(current_price_real_str)
-    time.sleep(0.5)
-    pya.press('enter')
-    time.sleep(0.5)
-    pya.click(1750, 1000)
-    time.sleep(1)
-    pya.click(125, 190)  # go back
-    time.sleep(0.5)
+    if resolution == '1440':
+        pya.click(1750, 700)
+        time.sleep(0.5)
+        pya.click(1750, 880)
+        time.sleep(0.5)
+        pya.typewrite(current_price_real_str)
+        time.sleep(0.5)
+        pya.press('enter')
+        time.sleep(0.5)
+        pya.click(1750, 800)
+        time.sleep(0.5)
+        pya.typewrite(current_price_str)
+        time.sleep(0.5)
+        pya.press('enter')
+        time.sleep(0.5)
+        pya.click(1750, 880)
+        time.sleep(0.5)
+        pya.typewrite(current_price_real_str)
+        time.sleep(0.5)
+        pya.press('enter')
+        time.sleep(0.5)
+        pya.click(1750, 1000)
+        time.sleep(1)
+        pya.click(125, 190)  # go back
+        time.sleep(0.5)
+
+    if resolution == '1080':
+        pya.click(1420, 600)
+        time.sleep(1)
+        pya.click(1420, 800)
+        time.sleep(0.5)
+        pya.typewrite(current_price_real_str)
+        time.sleep(0.5)
+        pya.press('enter')
+        time.sleep(0.5)
+        pya.click(1420, 720)
+        time.sleep(0.5)
+        pya.typewrite(current_price_str)
+        time.sleep(0.5)
+        pya.press('enter')
+        time.sleep(0.5)
+        pya.click(1420, 800)
+        time.sleep(0.5)
+        pya.typewrite(current_price_real_str)
+        time.sleep(0.5)
+        pya.press('enter')
+        time.sleep(0.5)
+        pya.click(1420, 920)
+        time.sleep(1.5)
+        pya.click(125, 190)  # go back
+        time.sleep(0.5)
 
 
 def buy_stuff(button_location):
 
-    global loop_count, searches, long_session_count, total_earned, missed, bought, transfer_list, total_spent, buy_time
+    global loop_count, searches, long_session_count, total_earned, missed, bought, transfer_list, total_spent, buy_time, resolution
 
     searches += 1  # increase searches_count
 
@@ -180,100 +235,256 @@ def buy_stuff(button_location):
 
     long_session_count += 1  # increase long_session_count
 
-    # if bid_price != None:
-    pya.click(button_location)  # move to + or - button
-    time.sleep(0.5)
-    pya.click(1600, 1300)  # search for player
-    time.sleep(0.5)
-    # perform the act of buying the player
-    pya.doubleClick(1750, 830)  # click buy player
-    pya.doubleClick(1750, 830)  # click buy player
-    pya.doubleClick(1750, 830)  # click buy player
-    pya.doubleClick(1750, 830)  # click buy player
-    time.sleep(0.11)
-    pya.click(1260, 800)  # confirm buy
-    time.sleep(0.5)
-
-    no_res = pya.locateCenterOnScreen(no_res_img, grayscale=True, region=(1200, 800, 300, 100), confidence=0.8)  # check if anyone was even found
-    time.sleep(0.1)
-
-    if no_res != None:
-        pya.click(125, 190)  # go back
+    if resolution == '1080':
+        pya.click(button_location)  # move to + or - button
         time.sleep(0.5)
-    else:
+        pya.click(1300, 950)  # search for player
+        time.sleep(0.5)
+        # perform the act of buying the player
+        pya.doubleClick(1420, 740)  # click buy player
+        pya.doubleClick(1420, 740)  # click buy player
+        pya.doubleClick(1420, 740)  # click buy player
+        pya.doubleClick(1420, 740)  # click buy player
+        time.sleep(0.11)
+        pya.click(1000, 620)  # confirm buy
+        time.sleep(0.5)
 
-        soft = pya.locateCenterOnScreen(soft_png, grayscale=True, confidence=0.7)  # check if soft banned
-        open_fifa = pya.locateCenterOnScreen(open_fifa_png, grayscale=True, confidence=0.7)  # check for other version of soft ban
-
-        if open_fifa != None:
-            print("got soft banned (open fifa or wait)")
-            exit(1)
-
-        if soft != None:
-            print("got soft banned")
-            exit(1)
-
-        failed = pya.locateCenterOnScreen(failed_img, grayscale=True, confidence=0.7)  # check if bid raised any other error message
-
+        no_res = pya.locateCenterOnScreen(no_res_img_1080, grayscale=True, region=(900, 640, 250, 100), confidence=0.8)
         time.sleep(0.1)
 
-        if failed != None:
-            missed += 1
+        if no_res != None:
             pya.click(125, 190)  # go back
             time.sleep(0.5)
-
         else:
-            won_bid = pya.locateCenterOnScreen(won_bid_img, grayscale=True, confidence=0.7)  # check if bid went through
 
-            time.sleep(0.2)
+            ######still need 1080 versions!!######
+            soft = pya.locateCenterOnScreen(soft_png, grayscale=True, confidence=0.7)  # check if soft banned
+            open_fifa = pya.locateCenterOnScreen(open_fifa_png, grayscale=True, confidence=0.7)  # check for other version of soft ban
 
-            if won_bid != None:
-                bought += 1
-                transfer_list += 1
+            if open_fifa != None:
+                print("got soft banned (open fifa or wait)")
+                exit(1)
 
-                buy_time = time.time()
+            if soft != None:
+                print("got soft banned (open fifa or wait)")
+                exit(1)
+            ################
 
-                price = pya.screenshot(region=(1720, 625, 43, 20))
-                # resize the image
-                price = cv2.cvtColor(np.array(price), cv2.COLOR_RGB2BGR)
-                price = cv2.resize(price, (430, 200), interpolation=cv2.INTER_LINEAR)
-                # save the resized image
-                cv2.imwrite("price.png", price)
-                price_cv = cv2.imread('price.png', 0)
-                thresh = cv2.threshold(price_cv, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-                data_price = pytesseract.image_to_string(thresh, lang='eng', config='--psm 6')
-                data_price = re.sub("[^0-9]", "", data_price)
-                if data_price.isnumeric():
-                    purchases.append(int(data_price))
-                    total_earned = total_earned + 0.95 * current_price - int(data_price)
-                    total_spent += int(data_price)
-                    print("\nBought for:", data_price, "\nTotal possibly earned:", total_earned, "\nTotal spent:",
-                          total_spent)
+            failed = pya.locateCenterOnScreen(failed_img_1080, grayscale=True, confidence=0.7)  # check if bid raised any other error message
 
-            dupe = pya.locateCenterOnScreen(dupe_png, grayscale=True, region=(1550, 750, 500, 100), confidence=0.8)
+            time.sleep(0.4)
 
-            if KRSU:
-                time.sleep(0.5)
-                pya.click(1750, 750)  # open bio
-                time.sleep(0.5)
-                rarity = pya.screenshot(region=(1585, 618, 200, 25))  # screenshot the card's rarity
-                rarity.save("rarity.png")
-
-                # read the rarity from the image
-                rarity_cv = cv2.imread('rarity.png', 0)
-                thresh_r = cv2.threshold(rarity_cv, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-                data_rarity = pytesseract.image_to_string(thresh_r, lang='eng', config='--psm 6')
-
-
-
+            if failed != None:
+                missed += 1
+                pya.click(125, 190)  # go back
                 time.sleep(0.5)
 
-                if dupe == None:
-                    rare_str = 'Rare'
-                    if rare_str in data_rarity:
+            else:
+                won_bid = pya.locateCenterOnScreen(won_bid_img_1080, grayscale=True, confidence=0.7)  # check if bid went through
+
+                time.sleep(0.2)
+
+                if won_bid != None:
+                    bought += 1
+                    transfer_list += 1
+
+                    buy_time = time.time()
+
+                    price = pya.screenshot(region=(1380, 540, 60, 25))
+                    # resize the image
+                    price = cv2.cvtColor(np.array(price), cv2.COLOR_RGB2BGR)
+                    price = cv2.resize(price, (600, 250), interpolation=cv2.INTER_LINEAR)
+                    # save the resized image
+                    cv2.imwrite("price.png", price)
+                    price_cv = cv2.imread('price.png', 0)
+                    thresh = cv2.threshold(price_cv, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+                    data_price = pytesseract.image_to_string(thresh, lang='eng', config='--psm 6')
+                    data_price = re.sub("[^0-9]", "", data_price)
+                    if data_price.isnumeric():
+                        purchases.append(int(data_price))
+                        total_earned = total_earned + 0.95 * current_price - int(data_price)
+                        total_spent += int(data_price)
+                        print("\nBought for:", data_price, "\nTotal possibly earned:", total_earned, "\nTotal spent:", total_spent)
+
+                dupe = pya.locateCenterOnScreen(dupe_png_1080, grayscale=True, region=(1550, 750, 500, 100), confidence=0.8)
+                # print(dupe)
+                if KRSU:
+                    time.sleep(0.5)
+                    pya.click(1420, 650)  # open bio
+                    time.sleep(0.5)
+                    rarity = pya.screenshot(region=(1266, 590, 200, 30))  # screenshot the card's rarity
+                    rarity.save("rarity.png")
+
+                    # read the rarity from the image
+                    rarity_cv = cv2.imread('rarity.png', 0)
+                    thresh_r = cv2.threshold(rarity_cv, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+                    data_rarity = pytesseract.image_to_string(thresh_r, lang='eng', config='--psm 6')
+
+
+
+                    time.sleep(0.5)
+
+                    if dupe == None:
+                        rare_str = 'Rare'
+                        if rare_str in data_rarity:
+                            time.sleep(0.1)
+                            pya.click(1287, 300)  # exit bio
+                            time.sleep(1)
+                            pya.click(1420, 700)  # add to club
+                            time.sleep(0.5)
+                            pya.click(125, 190)  # go back
+                            time.sleep(0.5)
+                        else:
+                            time.sleep(0.1)
+                            pya.click(1287, 300)  # exit bio
+                            time.sleep(1)
+                            # preform act of selling the player
+                            sell()
+                    else:
+                        time.sleep(0.1)
+                        pya.click(1287, 300)  # exit bio
+                        time.sleep(1)
+                        # preform act of selling the player
+                        sell()
+
+                if only_buy:
+                    if dupe == None:
+                        time.sleep(0.5)
+                        time.sleep(0.5)
+
+                        pya.click(1420, 700)  # add to club
+                        time.sleep(0.5)
+                        pya.click(125, 190)  # go back
+                        time.sleep(0.5)
+                    else:
+                        time.sleep(0.1)
+                        pya.click(1287, 300)  # exit bio
+                        time.sleep(1)
+                        # preform act of selling the player
+                        sell()
+
+                if only_sell:
+                    # preform act of selling the player
+                    sell()
+
+
+
+    # if bid_price != None:
+    if resolution == '1440':
+        # if bid_price != None:
+        pya.click(button_location)  # move to + or - button
+        time.sleep(0.5)
+        pya.click(1600, 1300)  # search for player
+        time.sleep(0.5)
+        # perform the act of buying the player
+        pya.doubleClick(1750, 830)  # click buy player
+        pya.doubleClick(1750, 830)  # click buy player
+        pya.doubleClick(1750, 830)  # click buy player
+        pya.doubleClick(1750, 830)  # click buy player
+        time.sleep(0.11)
+        pya.click(1260, 800)  # confirm buy
+        time.sleep(0.5)
+
+        no_res = pya.locateCenterOnScreen(no_res_img, grayscale=True, region=(1200, 800, 300, 100), confidence=0.8)  # check if anyone was even found
+        time.sleep(0.1)
+
+        if no_res != None:
+            pya.click(125, 190)  # go back
+            time.sleep(0.5)
+        else:
+
+            soft = pya.locateCenterOnScreen(soft_png, grayscale=True, confidence=0.7)  # check if soft banned
+            open_fifa = pya.locateCenterOnScreen(open_fifa_png, grayscale=True, confidence=0.7)  # check for other version of soft ban
+
+            if open_fifa != None:
+                print("got soft banned (open fifa or wait)")
+                exit(1)
+
+            if soft != None:
+                print("got soft banned (open fifa or wait)")
+                exit(1)
+
+            failed = pya.locateCenterOnScreen(failed_img, grayscale=True, confidence=0.7)  # check if bid raised any other error message
+
+            time.sleep(0.1)
+
+            if failed != None:
+                missed += 1
+                pya.click(125, 190)  # go back
+                time.sleep(0.5)
+
+            else:
+                won_bid = pya.locateCenterOnScreen(won_bid_img, grayscale=True, confidence=0.7)  # check if bid went through
+
+                time.sleep(0.2)
+
+                if won_bid != None:
+                    bought += 1
+                    transfer_list += 1
+
+                    buy_time = time.time()
+
+                    price = pya.screenshot(region=(1720, 625, 43, 20))
+                    # resize the image
+                    price = cv2.cvtColor(np.array(price), cv2.COLOR_RGB2BGR)
+                    price = cv2.resize(price, (430, 200), interpolation=cv2.INTER_LINEAR)
+                    # save the resized image
+                    cv2.imwrite("price.png", price)
+                    price_cv = cv2.imread('price.png', 0)
+                    thresh = cv2.threshold(price_cv, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+                    data_price = pytesseract.image_to_string(thresh, lang='eng', config='--psm 6')
+                    data_price = re.sub("[^0-9]", "", data_price)
+                    if data_price.isnumeric():
+                        purchases.append(int(data_price))
+                        total_earned = total_earned + 0.95 * current_price - int(data_price)
+                        total_spent += int(data_price)
+                        print("\nBought for:", data_price, "\nTotal possibly earned:", total_earned, "\nTotal spent:",
+                              total_spent)
+
+                dupe = pya.locateCenterOnScreen(dupe_png, grayscale=True, region=(1550, 750, 500, 100), confidence=0.8)
+
+                if KRSU:
+                    time.sleep(0.5)
+                    pya.click(1750, 750)  # open bio
+                    time.sleep(0.5)
+                    rarity = pya.screenshot(region=(1585, 618, 200, 25))  # screenshot the card's rarity
+                    rarity.save("rarity.png")
+
+                    # read the rarity from the image
+                    rarity_cv = cv2.imread('rarity.png', 0)
+                    thresh_r = cv2.threshold(rarity_cv, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+                    data_rarity = pytesseract.image_to_string(thresh_r, lang='eng', config='--psm 6')
+
+                    time.sleep(0.5)
+
+                    if dupe == None:
+                        rare_str = 'Rare'
+                        if rare_str in data_rarity:
+                            time.sleep(0.1)
+                            pya.click(1600, 325)  # exit bio
+                            time.sleep(1)
+                            pya.click(1750, 800)  # add to club
+                            time.sleep(0.5)
+                            pya.click(125, 190)  # go back
+                            time.sleep(0.5)
+                        else:
+                            time.sleep(0.1)
+                            pya.click(1600, 325)  # exit bio
+                            time.sleep(1)
+                            # preform act of selling the player
+                            sell()
+                    else:
                         time.sleep(0.1)
                         pya.click(1600, 325)  # exit bio
                         time.sleep(1)
+                        # preform act of selling the player
+                        sell()
+
+                if only_buy:
+                    if dupe == None:
+                        time.sleep(0.5)
+                        time.sleep(0.5)
+
                         pya.click(1750, 800)  # add to club
                         time.sleep(0.5)
                         pya.click(125, 190)  # go back
@@ -284,31 +495,12 @@ def buy_stuff(button_location):
                         time.sleep(1)
                         # preform act of selling the player
                         sell()
-                else:
-                    time.sleep(0.1)
-                    pya.click(1600, 325)  # exit bio
-                    time.sleep(1)
+
+                if only_sell:
                     # preform act of selling the player
                     sell()
 
-            if only_buy:
-                if dupe == None:
-                    time.sleep(0.5)
-                    time.sleep(0.5)
-                    pya.click(1750, 800)  # add to club
-                    time.sleep(0.5)
-                    pya.click(125, 190)  # go back
-                    time.sleep(0.5)
-                else:
-                    time.sleep(0.1)
-                    pya.click(1600, 325)  # exit bio
-                    time.sleep(1)
-                    # preform act of selling the player
-                    sell()
 
-            if only_sell:
-                # preform act of selling the player
-                sell()
 
 
 def recurring_prints():
@@ -356,14 +548,27 @@ def increment_loop_count():
     global loop_count
     loop_count += 1  # increase loop_count
 
-rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_png,launch_fifa_png,in_fifa_png,cont_local_png = image_loader()
+rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_png,launch_fifa_png,in_fifa_png,cont_local_png, no_res_img_1080, failed_img_1080, won_bid_img_1080, dupe_png_1080 = image_loader()
 
 ensure_mode_selection()
 
 def main():
+
+    ##test
+
+    ## end test
+
+
+    # all global vairables needed
+    global total_spent, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int, minus_buy, minus_bid, plus_buy, plus_bid
+
+    if resolution == '1080':
+        minus_bid = 500, 770  # coords of minus bid button
+        plus_bid = 970, 770  # coords of plus bid button
+        minus_buy = 500, 880  # coords of minus buy button
+        plus_buy = 970, 880  # coords of plus buy button
+
     while True:
-        #all global vairables needed
-        global total_spent, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int
 
         teamviewer_closer()  # check for teamviewer popup and close it
 
