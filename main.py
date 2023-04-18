@@ -9,6 +9,7 @@ import time
 from datetime import datetime, timedelta
 import threading
 import multiprocessing
+import numpy as np
 
 ## Currently not developed
 card_type = "Normal"
@@ -92,21 +93,22 @@ def ensure_mode_selection():
 
 def clear_transfer_list(clears, transfer):
     if transfer >=20:
-        global transfer_list
+        global transfer_list, TL_clears
         print("clearing transfer list")
         time.sleep(2)
-        pya.click(50,440)  # transfer list left
+        pya.click(50, 440)  # transfer list left
         time.sleep(2)
-        pya.click(1100,740)  # transfer list mid
+        pya.click(1100, 740)  # transfer list mid
         time.sleep(2)
-        pya.click(1500,330)  # clear sold
+        pya.click(1500, 330)  # clear sold
         time.sleep(2)
         pya.click(125, 190)  # go back
         time.sleep(2)
-        pya.click(1500,450)  # back to buying
+        pya.click(1500, 450)  # back to buying
         time.sleep(2)
         transfer_list = 0
-        clears+=1
+        clears += 1
+        TL_clears = clears
 
 def long_session_rest(session, long):
     if session:
@@ -232,7 +234,11 @@ def buy_stuff(button_location):
                 buy_time = time.time()
 
                 price = pya.screenshot(region=(1720, 625, 43, 20))
-                price.save("price.png")
+                # resize the image
+                price = cv2.cvtColor(np.array(price), cv2.COLOR_RGB2BGR)
+                price = cv2.resize(price, (430, 200), interpolation=cv2.INTER_LINEAR)
+                # save the resized image
+                cv2.imwrite("price.png", price)
                 price_cv = cv2.imread('price.png', 0)
                 thresh = cv2.threshold(price_cv, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
                 data_price = pytesseract.image_to_string(thresh, lang='eng', config='--psm 6')
@@ -306,7 +312,7 @@ def buy_stuff(button_location):
 
 
 def recurring_prints():
-    global buy_time
+    global buy_time, TL_clears
 
     print('\ntotal searches: ', searches)
     print('total sniped: ', bought)
@@ -355,50 +361,48 @@ rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_
 ensure_mode_selection()
 
 def main():
+    while True:
+        #all global vairables needed
+        global total_spent, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int
 
-    #all global vairables needed
-    global total_spent, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int
+        teamviewer_closer()  # check for teamviewer popup and close it
 
-    teamviewer_closer()  # check for teamviewer popup and close it
-
-    total_loops +=1  # increase loops counter
-    clear_transfer_list(TL_clears, transfer_list)  # check if transfer list needs clearing then clear if it does
-    long_session_rest(long_session, long_session_count)  # check if it's a long session and then rest as needed
-    set_random_int()  # set the random value that will be used to sleep
-
-
-    check_for_cancel()  # check if user wants to cancel script
-    check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-    if loop_count == 3:
-        reset_loop_count() # reset to start over
-        buy_stuff(plus_buy)
-        recurring_prints()
+        total_loops +=1  # increase loops counter
+        clear_transfer_list(TL_clears, transfer_list)  # check if transfer list needs clearing then clear if it does
+        long_session_rest(long_session, long_session_count)  # check if it's a long session and then rest as needed
+        set_random_int()  # set the random value that will be used to sleep
 
 
-    check_for_cancel()  # check if user wants to cancel script
-    check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-    if loop_count == 2:
-        buy_stuff(plus_bid)
-        increment_loop_count()
-        recurring_prints()
+        check_for_cancel()  # check if user wants to cancel script
+        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+        if loop_count == 3:
+            reset_loop_count() # reset to start over
+            buy_stuff(plus_buy)
+            recurring_prints()
 
 
-    check_for_cancel()  # check if user wants to cancel script
-    check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-    if loop_count == 1:
-        buy_stuff(minus_buy)
-        increment_loop_count()
-        recurring_prints()
+        check_for_cancel()  # check if user wants to cancel script
+        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+        if loop_count == 2:
+            buy_stuff(plus_bid)
+            increment_loop_count()
+            recurring_prints()
 
 
-    check_for_cancel()  # check if user wants to cancel script
-    check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-    if loop_count == 0:
-        buy_stuff(minus_bid)
-        increment_loop_count()
-        recurring_prints()
+        check_for_cancel()  # check if user wants to cancel script
+        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+        if loop_count == 1:
+            buy_stuff(minus_buy)
+            increment_loop_count()
+            recurring_prints()
 
-
+        print('hello')
+        check_for_cancel()  # check if user wants to cancel script
+        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+        if loop_count == 0:
+            buy_stuff(minus_bid)
+            increment_loop_count()
+            recurring_prints()
 
 
 # function that can stop process at the press of '=' button at any time
