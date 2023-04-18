@@ -15,7 +15,7 @@ card_type = "Normal"
 ## END DEV
 
 
-current_price = 650  # the price you want to sell at
+current_price = 700  # the price you want to sell at
 max_loops = 4000 # max amount of searches the code will do
 long_session=True # anti bot detection for long sessions but runs slower
 ## MODES
@@ -111,7 +111,6 @@ def clear_transfer_list(clears, transfer):
 def long_session_rest(session, long):
     if session:
         global long_session_count
-        print(long_session_count)
         if long >= 200:
             print("\n\nresting")
             time.sleep(300)
@@ -345,6 +344,10 @@ def recurring_prints():
 
     print(f"transfer list has been cleared {TL_clears} times")
 
+def reset_loop_count():
+    global loop_count
+    loop_count = 0
+
 
 rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_png,launch_fifa_png,in_fifa_png,cont_local_png = image_loader()
 
@@ -366,9 +369,10 @@ def main():
     check_for_cancel()  # check if user wants to cancel script
     check_for_20_sec_pause()  # check if user wants to pause for 20 sec
     if loop_count == 3:
+        reset_loop_count() # reset to start over
         buy_stuff(plus_buy)
         recurring_prints()
-
+    print(loop_count)
 
     check_for_cancel()  # check if user wants to cancel script
     check_for_20_sec_pause()  # check if user wants to pause for 20 sec
@@ -393,11 +397,6 @@ def main():
 
 
 
-def loop():
-    while True:
-        main()
-
-
 # function that can stop process at the press of '=' button at any time
 def listen_for_interrupt():
     while True:
@@ -409,7 +408,7 @@ def listen_for_interrupt():
 if __name__ == "__main__":
 
     # run both loops at the same time so that a key press can stop the other loop instantly
-    loop_process = multiprocessing.Process(target=loop)
+    loop_process = multiprocessing.Process(target=main)
     interrupt_process = multiprocessing.Process(target=listen_for_interrupt)
 
     loop_process.start()
