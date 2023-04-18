@@ -408,6 +408,7 @@ def listen_for_interrupt():
 
 if __name__ == "__main__":
 
+    # run both loops at the same time so that a key press can stop the other loop instantly
     loop_process = multiprocessing.Process(target=loop)
     interrupt_process = multiprocessing.Process(target=listen_for_interrupt)
 
