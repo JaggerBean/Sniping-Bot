@@ -330,17 +330,17 @@ def main_func():
 
 
     # Construct the paths to the image files
-    rare_png = Image.open(resource_path('rare.png'))
-    dupe_png = Image.open(resource_path('dupe.png'))
-    failed_img = Image.open(resource_path('fail.png'))
-    no_res_img = Image.open(resource_path('no_res.png'))
-    won_bid_img = Image.open(resource_path('won_bid.png'))
-    soft_png = Image.open(resource_path('soft_banned.png'))
-    team_png = Image.open(resource_path('team.png'))
-    open_fifa_png = Image.open(resource_path('open_fifa.png'))
-    launch_fifa_png = Image.open(resource_path('launch_fifa.png'))
-    in_fifa_png = Image.open(resource_path('in_fifa.png'))
-    cont_local_png = Image.open(resource_path('cont_local.png'))
+    rare_png = Image.open(resource_path('images/rare.png'))
+    dupe_png = Image.open(resource_path('images/dupe.png'))
+    failed_img = Image.open(resource_path('images/fail.png'))
+    no_res_img = Image.open(resource_path('images/no_res.png'))
+    won_bid_img = Image.open(resource_path('images/won_bid.png'))
+    soft_png = Image.open(resource_path('images/soft_banned.png'))
+    team_png = Image.open(resource_path('images/team.png'))
+    open_fifa_png = Image.open(resource_path('images/open_fifa.png'))
+    launch_fifa_png = Image.open(resource_path('images/launch_fifa.png'))
+    in_fifa_png = Image.open(resource_path('images/in_fifa.png'))
+    cont_local_png = Image.open(resource_path('images/cont_local.png'))
 
     # rare_png = Image.open('rare.png')
     # dupe_png = Image.open('dupe.png')

@@ -65,17 +65,17 @@ plus_buy = 1300, 915  # coords of plus buy button
 
 
 def image_loader():
-    rare_png = Image.open('rare.png')
-    dupe_png = Image.open('dupe.png')
-    failed_img = Image.open('fail.png')
-    no_res_img = Image.open('no_res.png')
-    won_bid_img = Image.open('won_bid.png')
-    soft_png = Image.open('soft_banned.png')
-    team_png = Image.open('team.png')
-    open_fifa_png = Image.open('open_fifa.png')
-    launch_fifa_png = Image.open('launch_fifa.png')
-    in_fifa_png = Image.open('in_fifa.png')
-    cont_local_png = Image.open('cont_local.png')
+    rare_png = Image.open('images/rare.png')
+    dupe_png = Image.open('images/dupe.png')
+    failed_img = Image.open('images/fail.png')
+    no_res_img = Image.open('images/no_res.png')
+    won_bid_img = Image.open('images/won_bid.png')
+    soft_png = Image.open('images/soft_banned.png')
+    team_png = Image.open('images/team.png')
+    open_fifa_png = Image.open('images/open_fifa.png')
+    launch_fifa_png = Image.open('images/launch_fifa.png')
+    in_fifa_png = Image.open('images/in_fifa.png')
+    cont_local_png = Image.open('images/cont_local.png')
 
     return rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_png,launch_fifa_png,in_fifa_png,cont_local_png
 
