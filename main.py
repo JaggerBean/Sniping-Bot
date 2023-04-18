@@ -601,7 +601,6 @@ def main():
             increment_loop_count()
             recurring_prints()
 
-        print('hello')
         check_for_cancel()  # check if user wants to cancel script
         check_for_20_sec_pause()  # check if user wants to pause for 20 sec
         if loop_count == 0:
