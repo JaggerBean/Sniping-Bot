@@ -15,6 +15,7 @@ import sys
 from tkinter import scrolledtext
 import os
 
+sys.stdout = open("log.txt", "a")
 
 ## Currently not developed
 card_type = "Normal"
@@ -55,7 +56,7 @@ start_time = time.time()
 buy_time = None
 TL_clears = 0
 purchases = []
-
+script_running = False
 paused = False
 loop_count = 0
 random_int = 0.5
@@ -108,16 +109,38 @@ def run_script(output_area):
     # Redirect standard output to the OutputRedirector object
     old_stdout = sys.stdout
     sys.stdout = OutputRedirector(output_area)
-
+    print("running script")
     # Call your main function here (replace 'your_main_function' with the actual function name)
     runner()
 
     # Reset standard output to the original value
     sys.stdout = old_stdout
 
+    global script_running
+    script_running = False
 
+script_running_lock = threading.Lock()
 def run_script_in_thread(output_area):
-    threading.Thread(target=run_script, args=(output_area,)).start()
+    global script_running
+    if script_running:
+        print("Script already running")
+        return
+    try:
+        # Acquire the lock to ensure that only one thread is started at a time
+        script_running_lock.acquire()
+        # Set the global variable to indicate that the script is running
+        script_running = True
+
+        print("Starting new thread")
+        threading.Thread(target=run_script, args=(output_area,)).start()
+    except Exception as e:
+        print(f"Exception in run_script_in_thread: {e}")
+        # Release the lock in case an exception occurs
+        script_running_lock.release()
+        script_running = False
+    else:
+        # Release the lock if the thread starts successfully
+        script_running_lock.release()
 
 
 def add_option(frame, label_text, button_text, update_function, initial_value=None):
@@ -178,9 +201,12 @@ def read_saved_values(variables):
         except FileNotFoundError:
             pass  # Ignore if the file does not exist
 
-def create_gui():
 
+
+def create_gui():
+    print("Creating GUI window...")
     option_frames = {}
+
 
     def add_option_int(variable_name, label_text, button_text, update_function):
         frame = tk.Frame(root)
