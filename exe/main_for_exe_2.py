@@ -24,9 +24,9 @@ card_type = "Normal"
 long_session= True  # anti bot detection for long sessions but runs slower
 ## MODES
 # set ONLY ONE of these to true at a time
-only_sell = True # always sells the players
-only_buy = False # stores all in the club
-KRSU = False # keep rares sell uncommons
+only_sell = "only_sell" # always sells the players
+only_buy = "only_buy" # stores all in the club
+KRSU = "KRSU" # keep rares sell uncommons
 ## END MODES
 
 
@@ -38,7 +38,8 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 
 #initialize global variables and counters
 max_loops = 'max_loops'  # max amount of searches the code will do
-resolution = '1440'  # resolution of main monitor with web app
+resolution_1440 = 'resolution_1440'  # resolution of main monitor with web app
+resolution_1080 = 'resolution_1080'
 buy_limit = 'buy_limit'  # set max amount of cards to snipe
 current_price = 'current_price'  # the price you want to sell at
 total_spent = 0
@@ -66,13 +67,20 @@ def past_input_reader(variables):
     for variable in variables:
         try:
             with open(f'{variable}.txt') as file:
-                value = int(file.read())
+                value = file.read()
+                if value.lower() == "true" or value.lower() == "false":
+                    value = True if value.lower() == "true" else False
+                else:
+                    value = int(value)
                 globals()[variable] = value
                 print(f"{variable} updated to {value}")
         except FileNotFoundError:
             print(f"File not found for variable: {variable}")
         except ValueError:
             print(f"Invalid value in file for variable: {variable}")
+
+
+
 
 def update_current_price():
     global current_price, current_price_real_str, current_price_str
@@ -112,11 +120,13 @@ def run_script_in_thread(output_area):
     threading.Thread(target=run_script, args=(output_area,)).start()
 
 
-def add_option(frame, label_text, button_text, update_function):
+def add_option(frame, label_text, button_text, update_function, initial_value=None):
     option_label = tk.Label(frame, text=label_text)
     option_label.pack(side=tk.LEFT, padx=5, pady=5)
 
     option_entry = tk.Entry(frame)
+    if initial_value is not None:
+        option_entry.insert(0, initial_value)
     option_entry.pack(side=tk.LEFT, padx=5, pady=5)
 
     option_button = tk.Button(frame, text=button_text, command=lambda: update_function(option_entry.get()))
@@ -133,27 +143,7 @@ def update_int(value, variable):
         print("Invalid input. Please enter a valid number.")
     variable = value
 
-def update_max_loops(value):
-    global max_loops
-    try:
-        # print(f"original max loop {max_loops}")
-        max_loops = int(value)
-        print(f"Max loops updated to {max_loops}")
-        with open("max_loops.txt", "w") as file:
-            file.write(str(max_loops))
-    except ValueError:
-        print("Invalid input. Please enter a valid number.")
 
-def update_price(value):
-    global current_price
-    try:
-        # print(f"original max loop {max_loops}")
-        current_price = int(value)
-        print(f"Current sell price updated to {current_price}")
-        with open("current_price.txt", "w") as file:
-            file.write(str(current_price))
-    except ValueError:
-        print("Invalid input. Please enter a valid number.")
 
 def update_bool(value, variable):
     globals()[variable]
@@ -164,42 +154,39 @@ def update_bool(value, variable):
         file.write(str(value))
     variable = value
 
-def add_boolean_option(root, variable_name, text, update_function):
-    frame = tk.Frame(root)
-    frame.pack(padx=10, pady=5)
-
-    bool_var = tk.BooleanVar()
-
-    def on_value_change(*args):
-        update_function(bool_var.get(), variable_name)
-
-    bool_var.trace("w", on_value_change)
-    check_button = tk.Checkbutton(frame, text=text, variable=bool_var, onvalue=True, offvalue=False)
-    check_button.pack(padx=10, pady=5)
-
+def add_boolean_option(parent, variable_name, text, update_function):
+    var = tk.BooleanVar()
+    var.set(globals()[variable_name])
+    var.trace("w", lambda *args: update_function(var.get(), variable_name))
+    check_button = tk.Checkbutton(parent, text=text, variable=var, onvalue=True, offvalue=False)
+    check_button.pack(padx=5, pady=5)
     return check_button
 
 def read_saved_values(variables):
     for variable_name in variables:
         try:
             with open(f"{variable_name}.txt", "r") as file:
-                value = file.read()
-                if value.lower() == "true" or value.lower() == "false":
-                    value = True if value.lower() == "true" else False
+                value = file.read().strip().lower()
+                if value == "true":
+                    value = True
+                elif value == "false":
+                    value = False
                 else:
                     value = int(value)
                 globals()[variable_name] = value
+                print(f"{variable_name}: {value}, type: {type(value)}")
         except FileNotFoundError:
             pass  # Ignore if the file does not exist
 
 def create_gui():
 
     option_frames = {}
+
     def add_option_int(variable_name, label_text, button_text, update_function):
         frame = tk.Frame(root)
         frame.pack(padx=10, pady=5)
-        option_frames[variable_name] = frame
-        add_option(frame, label_text, button_text, update_function)
+        initial_value = globals()[variable_name]
+        add_option(frame, label_text, button_text, update_function, initial_value=initial_value)
 
     def update_bool(value, variable):
         print(f"{variable} updated to {value}")
@@ -207,11 +194,6 @@ def create_gui():
             file.write(str(value))
 
 
-    global price_entry
-    global loops_entry
-    global sell_entry
-    global buy_entry
-    global KRSU_entry
     root = tk.Tk()
     root.title("Your Script Output")
 
@@ -224,7 +206,10 @@ def create_gui():
     run_button = tk.Button(frame, text="Run Script", command=lambda: run_script_in_thread(output_area))
     run_button.pack(side=tk.LEFT, pady=5)
 
-    variables_to_load = ["only_sell", "only_buy", "KRSU", "buy_limit", "max_loops"]
+    sys.stdout = OutputRedirector(output_area)
+
+    variables_to_load = ["only_sell", "only_buy", "KRSU", "buy_limit", "max_loops", "current_price", "resolution_1080", "resolution_1440"]
+
     read_saved_values(variables_to_load)
 
     add_option_int("buy_limit", "How many players would you like to buy?", "Update Buy Limit", lambda value: update_int(value, "buy_limit"))
@@ -233,11 +218,21 @@ def create_gui():
 
     add_option_int("current_price", "At what price do you want to sell the players?", "Update Current Price", lambda value: update_int(value, "current_price"))
 
+    mode_label = tk.Label(root, text="MODES (Only one may be selected):")
+    mode_label.pack(pady=10)
+
     only_sell_button = add_boolean_option(root, "only_sell", "Only Sell", update_bool)
 
     only_buy_button = add_boolean_option(root, "only_buy", "Only Buy", update_bool)
 
     KRSU_button = add_boolean_option(root, "KRSU", "Keep Rares Sell Uncommons", update_bool)
+
+    resolution_label = tk.Label(root, text="RESOLUTION (Only one may be selected):")
+    resolution_label.pack(pady=10)
+
+    button_1080 = add_boolean_option(root, "resolution_1080", "1080P", update_bool)
+
+    button_1440 = add_boolean_option(root, "resolution_1440", "1440P", update_bool)
 
 
     root.mainloop()
@@ -270,22 +265,28 @@ def image_loader():
 
 def max_search_check():
     global max_loops, total_loops
-    print(f'maxloops {max_loops}')
     if total_loops > max_loops:
         print('reached max iterations')
         exit(1)
 
 def ensure_mode_selection():
     global only_buy, only_sell, KRSU
-    if sum([only_buy, only_sell, KRSU]) != 1:
-        modes = sum([only_buy, only_sell, KRSU])
+    modes = sum(int(val) for val in [only_buy, only_sell, KRSU])
+    if modes != 1:
         print(f'must turn on exactly one mode at a time! Currently {modes} modes are turned on')
+        exit(1)
+
+def ensure_resolution():
+    global resolution_1080, resolution_1440
+    resolution = sum(int(val) for val in [resolution_1440, resolution_1080])
+    if resolution != 1:
+        print(f'must turn on exactly one resolution at a time! Currently {resolution} resolutions are turned on')
         exit(1)
 
 def clear_transfer_list(clears, transfer):
     if transfer >=20:
         global transfer_list, TL_clears, resolution
-        if resolution == '1440':
+        if resolution_1440:
             print("clearing transfer list")
             time.sleep(2)
             pya.click(50, 440)  # transfer list left
@@ -302,7 +303,7 @@ def clear_transfer_list(clears, transfer):
             clears += 1
             TL_clears = clears
 
-        if resolution == '1080':
+        if resolution_1080:
             print("clearing transfer list")
             time.sleep(2)
             pya.click(50, 440)  # transfer list left
@@ -349,9 +350,9 @@ def teamviewer_closer():
         time.sleep(1)
 
 def sell():
-    global current_price_real_str, current_price_str, resolution
+    global current_price_real_str, current_price_str, resolution_1080, resolution_1440
 
-    if resolution == '1440':
+    if resolution_1440:
         pya.click(1750, 700)
         time.sleep(0.5)
         pya.click(1750, 880)
@@ -377,7 +378,7 @@ def sell():
         pya.click(125, 190)  # go back
         time.sleep(0.5)
 
-    if resolution == '1080':
+    if resolution_1080:
         pya.click(1420, 600)
         time.sleep(1)
         pya.click(1420, 800)
@@ -406,7 +407,7 @@ def sell():
 
 def buy_stuff(button_location):
 
-    global loop_count, searches, long_session_count, total_earned, missed, bought, transfer_list, total_spent, buy_time, resolution
+    global loop_count, searches, long_session_count, total_earned, missed, bought, transfer_list, total_spent, buy_time, resolution_1440, resolution_1080
 
     searches += 1  # increase searches_count
 
@@ -416,7 +417,7 @@ def buy_stuff(button_location):
 
     long_session_count += 1  # increase long_session_count
 
-    if resolution == '1080':
+    if resolution_1080:
         pya.click(button_location)  # move to + or - button
         time.sleep(0.5)
         pya.click(1300, 950)  # search for player
@@ -551,7 +552,7 @@ def buy_stuff(button_location):
 
 
     # if bid_price != None:
-    if resolution == '1440':
+    if resolution_1440:
         # if bid_price != None:
         pya.click(button_location)  # move to + or - button
         time.sleep(0.5)
@@ -731,31 +732,36 @@ def increment_loop_count():
 
 rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_png,launch_fifa_png,in_fifa_png,cont_local_png, no_res_img_1080, failed_img_1080, won_bid_img_1080, dupe_png_1080 = image_loader()
 
-ensure_mode_selection()
+
 
 def main():
     # all global vairables needed
-    global total_spent, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int, minus_buy, minus_bid, plus_buy, plus_bid, buy_limit
+    global total_spent, resolution_1440, resolution_1080, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int, minus_buy, minus_bid, plus_buy, plus_bid, buy_limit
 
     ##test
-    past_input_reader([max_loops, buy_limit, current_price])
+
+
+    ## end test
+
+    past_input_reader([max_loops, buy_limit, current_price, KRSU, only_buy, only_sell, resolution_1080, resolution_1440])
+
+
+    ensure_mode_selection()
+
+    ensure_resolution()
 
     update_current_price()
 
-    print(max_loops)
-    print(buy_limit)
-    print(current_price)
-    ## end test
 
 
-    if resolution == '1080':
+    if resolution_1080:
         minus_bid = 500, 770  # coords of minus bid button
         plus_bid = 970, 770  # coords of plus bid button
         minus_buy = 500, 880  # coords of minus buy button
         plus_buy = 970, 880  # coords of plus buy button
 
 
-    if resolution == '1440':
+    if resolution_1440:
         minus_bid = 830, 800  # coords of minus bid button
         plus_bid = 1300, 800  # coords of plus bid button
         minus_buy = 830, 915  # coords of minus buy button
