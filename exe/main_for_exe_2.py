@@ -59,6 +59,8 @@ paused = False
 loop_count = 0
 random_int = 0.5
 script_running_lock = threading.Lock()
+krsu_keeps = 0
+krsu_max_keeps = "krsu_max_keeps"
 
 
 
@@ -131,16 +133,17 @@ def run_script_in_thread(output_area):
 
 
 def add_option(frame, label_text, button_text, update_function, initial_value=None):
-    option_label = tk.Label(frame, text=label_text)
-    option_label.pack(side=tk.LEFT, padx=5, pady=5)
+    option_label = tk.Label(frame, text=label_text, font=("Arial Black", 21), fg="#F8EEC9", bg='#302B27')
+    option_label.pack(side=tk.LEFT, padx=0, pady=0)
 
-    option_entry = tk.Entry(frame)
+    option_entry = tk.Entry(frame, bg='#211D1A', fg='#F8EEC9', font=("Arial", 26, "bold"), width=16)
     if initial_value is not None:
         option_entry.insert(0, initial_value)
-    option_entry.pack(side=tk.LEFT, padx=5, pady=5)
+    option_entry.pack(side=tk.LEFT, padx=0, pady=0)
 
-    option_button = tk.Button(frame, text=button_text, command=lambda: update_function(option_entry.get()))
-    option_button.pack(side=tk.LEFT, padx=5, pady=5)
+    option_button = tk.Button(frame, text=button_text, font=("Arial Black", 14), bg='#E9DFCD', fg="#F65624", command=lambda: update_function(option_entry.get()))
+    option_button.pack(side=tk.LEFT, padx=0, pady=0)
+
 
 def update_int(value, variable):
     globals()[variable]
@@ -168,8 +171,8 @@ def add_boolean_option(parent, variable_name, text, update_function):
     var = tk.BooleanVar()
     var.set(globals()[variable_name])
     var.trace("w", lambda *args: update_function(var.get(), variable_name))
-    check_button = tk.Checkbutton(parent, text=text, variable=var, onvalue=True, offvalue=False)
-    check_button.pack(padx=5, pady=5)
+    check_button = tk.Checkbutton(parent, text=text, bg='#302B27', fg='#A09787', font=("Arial Black", 13), variable=var, onvalue=True, offvalue=False)
+    check_button.pack(padx=0, pady=0)
     return check_button
 
 def read_saved_values(variables):
@@ -184,9 +187,8 @@ def read_saved_values(variables):
                 else:
                     value = int(value)
                 globals()[variable_name] = value
-                print(f"{variable_name}: {value}, type: {type(value)}")
         except FileNotFoundError:
-            pass  # Ignore if the file does not exist
+            globals()[variable_name] = "Please enter value"
 
 
 def create_gui():
@@ -196,7 +198,7 @@ def create_gui():
 
     def add_option_int(variable_name, label_text, button_text, update_function):
         frame = tk.Frame(root)
-        frame.pack(padx=10, pady=5)
+        frame.pack(padx=0, pady=0)
         initial_value = globals()[variable_name]
         add_option(frame, label_text, button_text, update_function, initial_value=initial_value)
 
@@ -207,31 +209,72 @@ def create_gui():
 
 
     root = tk.Tk()
-    root.title("Your Script Output")
+    root.configure(background='#302B27')
+    root.title("Sniper No Sniping!!!")
+
+
+    instructions = ["1} \nShortly hold the 'pause' button on the keyboard (to the right of the F keys) to immediately halt the program\n\n", "2} \nto pause the program for 20 seconds after the current search is concluded, hold '-' until the search is done\n\n", "3} \nto halt the program after the current search is done, hold '=' until the search is finished\n\n"]
+
+    # Concatenate the instructions with newlines to create the text to display
+    instructions_text = "\n".join(instructions)
+
+    # Create a Text widget to display the instructions
+    # Create a frame to hold the label and the text widget
+    frame = tk.Frame(root, bg='#1E242A')
+    frame.pack(side=tk.LEFT, padx=0, pady=0)
+
+    # Add the label to the frame
+    mode_label = tk.Label(frame, text="INSTRUCTIONS:", bg='#302B27', fg="#F8EEC9",width=17, font=("Arial Black", 21, "bold"))
+    mode_label.pack(side=tk.TOP, anchor=tk.W)
+
+    # Add the text widget to the frame
+    instructions_display = tk.Text(frame, bg='#1E242A', fg="#F8EEC9", height=30, width=40, wrap=tk.WORD)
+    instructions_display.insert(tk.END, instructions_text)
+    instructions_display.pack(side=tk.TOP, padx=0, pady=0)
 
     frame = tk.Frame(root)
-    frame.pack(padx=10, pady=10)
+    frame.pack(padx=0, pady=0)
 
-    output_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD, width=80, height=20)
-    output_area.pack(side=tk.LEFT, padx=5, pady=5, fill=tk.BOTH, expand=True)
+    output_area = scrolledtext.ScrolledText(frame, bg='#1E242A',fg='#F8EEC9', wrap=tk.WORD, width=50, height=10)
+    output_area.pack(side=tk.LEFT, padx=0, pady=0, fill=tk.BOTH, expand=True)
 
-    run_button = tk.Button(frame, text="Run Script", command=lambda: run_script_in_thread(output_area))
-    run_button.pack(side=tk.LEFT, pady=5)
+    run_button = tk.Button(frame, text="Run Script", font=("Arial Black", 20), fg="#E9DFCD", bg='#F65624', command=lambda: run_script_in_thread(output_area), width=10, height=4)
+    run_button.pack(side=tk.LEFT, padx=0, pady=0)
 
     sys.stdout = OutputRedirector(output_area)
 
-    variables_to_load = ["only_sell", "only_buy", "KRSU", "buy_limit", "max_loops", "current_price", "resolution_1080", "resolution_1440"]
+    variables_to_load = ["only_sell", "only_buy", "KRSU", "buy_limit", "max_loops", "current_price", "resolution_1080", "resolution_1440", "krsu_max_keeps"]
 
     read_saved_values(variables_to_load)
 
-    add_option_int("buy_limit", "How many players would you like to buy?", "Update Buy Limit", lambda value: update_int(value, "buy_limit"))
+    spacer = tk.Frame(root, height=30, bg='#302B27')
+    spacer.pack()
 
-    add_option_int("max_loops", "How many searches would you like to cap it at?", "Update Search Limit", lambda value: update_int(value, "max_loops"))
+    add_option_int("buy_limit", "Buy Limit:", "Update", lambda value: update_int(value, "buy_limit"))
 
-    add_option_int("current_price", "At what price do you want to sell the players?", "Update Current Price", lambda value: update_int(value, "current_price"))
+    spacer = tk.Frame(root, height=30, bg='#302B27')
+    spacer.pack()
 
-    mode_label = tk.Label(root, text="MODES (Only one may be selected):")
-    mode_label.pack(pady=10)
+    add_option_int("max_loops", "Search Limit:", "Update", lambda value: update_int(value, "max_loops"))
+
+    spacer = tk.Frame(root, height=30, bg='#302B27')
+    spacer.pack()
+
+    add_option_int("current_price", "Sell Price:", "Update", lambda value: update_int(value, "current_price"))
+
+    spacer = tk.Frame(root, height=30, bg='#302B27')
+    spacer.pack()
+
+    add_option_int("krsu_max_keeps", "Max Keeps:", "Update", lambda value: update_int(value, "krsu_max_keeps"))
+
+    spacer = tk.Frame(root, height=30, bg='#302B27')
+    spacer.pack()
+
+    mode_label = tk.Label(root, text="MODES:", font=("Arial Black", 21, "bold"), bg='#302B27', fg="#F8EEC9")
+    mode_label.pack(side="top")
+
+    info_label = tk.Label(root, text=" (only one may be selected)", font=("Arial Black", 10), bg='#302B27', fg="#AC0D53")
+    info_label.pack(side="top")
 
     only_sell_button = add_boolean_option(root, "only_sell", "Only Sell", update_bool)
 
@@ -239,8 +282,15 @@ def create_gui():
 
     KRSU_button = add_boolean_option(root, "KRSU", "Keep Rares Sell Uncommons", update_bool)
 
-    resolution_label = tk.Label(root, text="RESOLUTION (Only one may be selected):")
-    resolution_label.pack(pady=10)
+    spacer = tk.Frame(root, height=30, bg='#302B27')
+    spacer.pack()
+
+    mode_label = tk.Label(root, text="RESOLUTION:", bg='#302B27', font=("Arial Black", 21, "bold"), fg="#F8EEC9")
+    mode_label.pack(side="top")
+
+    # create the second label with bold black text
+    info_label = tk.Label(root, text=" (only one may be selected)", bg='#302B27', font=("Arial Black", 10), fg="#AC0D53")
+    info_label.pack(side="top")
 
     button_1080 = add_boolean_option(root, "resolution_1080", "1080P", update_bool)
 
@@ -277,7 +327,7 @@ def image_loader():
 
 def max_search_check():
     global max_loops, total_loops
-    if total_loops > max_loops:
+    if total_loops >= max_loops + 1:
         print('reached max iterations')
         sys.exit(1)
 
@@ -361,6 +411,12 @@ def teamviewer_closer():
         pya.click(1500, 630)  # close teamviewer popup
         time.sleep(1)
 
+def krsu_keeps_chacker():
+    global krsu_keeps, krsu_max_keeps
+    if krsu_keeps >= krsu_max_keeps:
+        print("reached KRSU max!")
+        sys.exit(1)
+
 def sell():
     global current_price_real_str, current_price_str, resolution_1080, resolution_1440
 
@@ -419,13 +475,15 @@ def sell():
 
 def buy_stuff(button_location):
 
-    global loop_count, searches, long_session_count, total_earned, missed, bought, transfer_list, total_spent, buy_time, resolution_1440, resolution_1080
+    global loop_count, searches, long_session_count, total_earned, missed, bought, transfer_list, total_spent, buy_time, resolution_1440, resolution_1080, krsu_keeps
 
     searches += 1  # increase searches_count
 
+    max_search_check()  # see if max search has been hit
+
     time.sleep(random_int / 2)  # sleep a random amount of time
 
-    max_search_check()  # see if max search has been hit
+
 
     long_session_count += 1  # increase long_session_count
 
@@ -528,6 +586,7 @@ def buy_stuff(button_location):
                             time.sleep(0.5)
                             pya.click(125, 190)  # go back
                             time.sleep(0.5)
+                            krsu_keeps += 1
                         else:
                             time.sleep(0.1)
                             pya.click(1287, 300)  # exit bio
@@ -661,6 +720,7 @@ def buy_stuff(button_location):
                             time.sleep(0.5)
                             pya.click(125, 190)  # go back
                             time.sleep(0.5)
+                            krsu_keeps += 1
                         else:
                             time.sleep(0.1)
                             pya.click(1600, 325)  # exit bio
@@ -830,6 +890,7 @@ def listen_for_interrupt():
         if keyboard.is_pressed('pause'):
             print("Interrupt received (pressed 'pause' key)")
             sys.exit(1)
+        time.sleep(0.1)
 
 def runner():
     print("in run")
