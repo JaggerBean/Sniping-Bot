@@ -1,0 +1,22 @@
+Creating GUI window...
+max_loops updated to 1
+buy_limit updated to 5
+current_price updated to 650
+KRSU updated to False
+only_buy updated to True
+only_sell updated to True
+resolution_1080 updated to False
+resolution_1440 updated to True
+must turn on exactly one mode at a time! Currently 2 modes are turned on
+Creating GUI window...
+Interrupt received (pressed 'pause' key)
+max_loops updated to 1
+buy_limit updated to 5
+current_price updated to 650
+KRSU updated to False
+only_buy updated to True
+only_sell updated to True
+resolution_1080 updated to False
+resolution_1440 updated to True
+must turn on exactly one mode at a time! Currently 2 modes are turned on
+Creating GUI window...
