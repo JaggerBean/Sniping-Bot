@@ -18,8 +18,8 @@ card_type = "Normal"
 
 
 resolution = '1440'  # resolution of main monitor with web app
-buy_limit = 1  # set max amount of cards to snipe
-current_price = 700  # the price you want to sell at
+buy_limit = 9999  # set max amount of cards to snipe
+current_price = 600  # the price you want to sell at
 max_loops = 4000  # max amount of searches the code will do
 long_session= True  # anti bot detection for long sessions but runs slower
 ## MODES

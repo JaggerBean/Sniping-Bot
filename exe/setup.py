@@ -3,7 +3,7 @@ from cx_Freeze import setup, Executable
 
 # Dependencies are automatically detected, but it might need fine tuning.
 build_exe_options = {"packages": ["os", "random", "PIL", "pyautogui", "cv2", "pytesseract", "re", "keyboard", "time", "io", "sys", "threading"],
-	"include_files": ["rare.png", "dupe.png", "fail.png","no_res.png","won_bid.png","soft_banned.png","team.png","open_fifa.png","launch_fifa.png","in_fifa.png","cont_local.png", "only_buy.txt", "max_loops.txt", "buy_limit.txt", "only_sell.txt", "current_price.txt", "resolution_1440.txt", "resolution_1080.txt", "KRSU.txt", "no_res_1080.png", "fail_1080.png", "won_bid_1080.png", "dupe_1080.png", ]}
+	"include_files": ["rare.png", "long_session.txt",  "check.png", "unchecked.png", "dupe.png", "fail.png","no_res.png","won_bid.png","soft_banned.png","team.png","open_fifa.png","launch_fifa.png","in_fifa.png","cont_local.png", "only_buy.txt", "max_loops.txt", "buy_limit.txt", "only_sell.txt", "current_price.txt", "resolution_1440.txt", "resolution_1080.txt", "KRSU.txt", "no_res_1080.png", "fail_1080.png", "won_bid_1080.png", "dupe_1080.png", ]}
 
 # GUI applications require a different base on Windows (the default is for a console application).
 base = None
