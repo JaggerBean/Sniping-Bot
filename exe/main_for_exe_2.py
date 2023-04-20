@@ -58,6 +58,7 @@ script_running = False
 paused = False
 loop_count = 0
 random_int = 0.5
+script_running_lock = threading.Lock()
 
 
 
@@ -110,15 +111,7 @@ def run_script(output_area):
     runner()
 
 
-    global script_running
-    script_running = False
-
-script_running_lock = threading.Lock()
 def run_script_in_thread(output_area):
-    global script_running
-    if script_running:
-        print("Script already running")
-        return
     try:
         # Acquire the lock to ensure that only one thread is started at a time
         script_running_lock.acquire()
@@ -194,7 +187,6 @@ def read_saved_values(variables):
                 print(f"{variable_name}: {value}, type: {type(value)}")
         except FileNotFoundError:
             pass  # Ignore if the file does not exist
-
 
 
 def create_gui():
