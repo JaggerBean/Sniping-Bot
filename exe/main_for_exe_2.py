@@ -15,8 +15,6 @@ import sys
 from tkinter import scrolledtext
 import os
 
-sys.stdout = open("log.txt", "a")
-
 ## Currently not developed
 card_type = "Normal"
 ## END DEV
@@ -107,14 +105,10 @@ class OutputRedirector:
 
 def run_script(output_area):
     # Redirect standard output to the OutputRedirector object
-    old_stdout = sys.stdout
-    sys.stdout = OutputRedirector(output_area)
     print("running script")
     # Call your main function here (replace 'your_main_function' with the actual function name)
     runner()
 
-    # Reset standard output to the original value
-    sys.stdout = old_stdout
 
     global script_running
     script_running = False
@@ -293,21 +287,21 @@ def max_search_check():
     global max_loops, total_loops
     if total_loops > max_loops:
         print('reached max iterations')
-        exit(1)
+        sys.exit(1)
 
 def ensure_mode_selection():
     global only_buy, only_sell, KRSU
     modes = sum(int(val) for val in [only_buy, only_sell, KRSU])
     if modes != 1:
         print(f'must turn on exactly one mode at a time! Currently {modes} modes are turned on')
-        exit(1)
+        sys.exit(1)
 
 def ensure_resolution():
     global resolution_1080, resolution_1440
     resolution = sum(int(val) for val in [resolution_1440, resolution_1080])
     if resolution != 1:
         print(f'must turn on exactly one resolution at a time! Currently {resolution} resolutions are turned on')
-        exit(1)
+        sys.exit(1)
 
 def clear_transfer_list(clears, transfer):
     if transfer >=20:
@@ -357,7 +351,7 @@ def long_session_rest(session, long):
 def check_for_cancel():
     if keyboard.is_pressed("="):
         print("keyboard interrupt")
-        exit(1)
+        sys.exit(1)
 
 def check_for_20_sec_pause():
     if keyboard.is_pressed("-"):
@@ -471,11 +465,11 @@ def buy_stuff(button_location):
 
             if open_fifa != None:
                 print("got soft banned (open fifa or wait)")
-                exit(1)
+                sys.exit(1)
 
             if soft != None:
                 print("got soft banned (open fifa or wait)")
-                exit(1)
+                sys.exit(1)
             ################
 
             failed = pya.locateCenterOnScreen(failed_img_1080, grayscale=True, confidence=0.7)  # check if bid raised any other error message
@@ -606,11 +600,11 @@ def buy_stuff(button_location):
 
             if open_fifa != None:
                 print("got soft banned (open fifa or wait)")
-                exit(1)
+                sys.exit(1)
 
             if soft != None:
                 print("got soft banned (open fifa or wait)")
-                exit(1)
+                sys.exit(1)
 
             failed = pya.locateCenterOnScreen(failed_img, grayscale=True, confidence=0.7)  # check if bid raised any other error message
 
@@ -761,6 +755,8 @@ rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_
 
 
 def main():
+
+    print("in main")
     # all global vairables needed
     global total_spent, resolution_1440, resolution_1080, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int, minus_buy, minus_bid, plus_buy, plus_bid, buy_limit
 
@@ -770,7 +766,6 @@ def main():
     ## end test
 
     past_input_reader([max_loops, buy_limit, current_price, KRSU, only_buy, only_sell, resolution_1080, resolution_1440])
-
 
     ensure_mode_selection()
 
@@ -796,7 +791,7 @@ def main():
     while True:
         if bought >= buy_limit:
             print("reached max purchases")
-            exit(0)
+            sys.exit(1)
 
         teamviewer_closer()  # check for teamviewer popup and close it
 
@@ -842,9 +837,10 @@ def listen_for_interrupt():
     while True:
         if keyboard.is_pressed('pause'):
             print("Interrupt received (pressed 'pause' key)")
-            exit(1)
+            sys.exit(1)
 
 def runner():
+    print("in run")
     # run both loops at the same time so that a key press can stop the other loop instantly
     loop_process = multiprocessing.Process(target=main)
     interrupt_process = multiprocessing.Process(target=listen_for_interrupt)
@@ -856,5 +852,6 @@ def runner():
     loop_process.terminate()
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     create_gui()
 
