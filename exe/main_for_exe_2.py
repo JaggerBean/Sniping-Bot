@@ -465,7 +465,7 @@ def ensure_resolution():
         print(f'must turn on exactly one resolution at a time! Currently {resolution} resolutions are turned on')
         sys.exit(1)
 
-def clear_transfer_list(clears, transfer):
+def clear_transfer_list(clears, transfer, general_time_mult):
     if transfer >=20:
         global transfer_list, TL_clears, resolution
         if resolution_1440:
@@ -536,7 +536,7 @@ def set_random_int():
     random_int = random.randrange(3, 9, 1)
 
 
-def teamviewer_closer():
+def teamviewer_closer(general_time_mult):
     team = pya.locateCenterOnScreen(team_png, grayscale=True, region=(800, 500, 700, 400), confidence=0.8)
 
     if team != None:
@@ -985,10 +985,10 @@ def main(general_time_mult, time_to_load_search):
         if count_res == 1:
             count_res =  set_random_rest()
 
-        teamviewer_closer()  # check for teamviewer popup and close it
+        teamviewer_closer(general_time_mult)  # check for teamviewer popup and close it
 
         total_loops +=1  # increase loops counter
-        clear_transfer_list(TL_clears, transfer_list)  # check if transfer list needs clearing then clear if it does
+        clear_transfer_list(TL_clears, transfer_list, general_time_mult)  # check if transfer list needs clearing then clear if it does
         count_res = long_session_rest(long_session, long_session_count, general_time_mult)  # check if it's a long session and then rest as needed
         set_random_int()  # set the random value that will be used to sleep
 
