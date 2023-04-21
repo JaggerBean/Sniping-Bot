@@ -400,9 +400,7 @@ def create_gui():
     sniping_pic = Image.open('snipe_coins.png')
     sniping_pic_tk = ImageTk.PhotoImage(sniping_pic)
 
-    run_button = tk.Button(root, image=sniping_pic_tk, bg="#33353C",
-                           command=lambda: run_script_in_thread(output_area, general_time_mult, time_to_load_search, style="CircularButton.TButton"),
-                           width=200, height=200)
+    run_button = tk.Button(root, image=sniping_pic_tk, bg="#33353C", command=lambda: run_script_in_thread(output_area, general_time_mult, time_to_load_search), width=200, height=200)
     run_button.pack(padx=0, pady=0)
 
     arrow = Image.open('arrow_point.png')
