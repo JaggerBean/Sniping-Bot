@@ -67,6 +67,8 @@ unchecked_image = Image.open('check.png')
 checked_image = Image.open('unchecked.png')
 checked_image = checked_image.resize((16, 16))
 unchecked_image = unchecked_image.resize((15, 15))
+random_rest = 0
+random_rest_time = 0
 
 def past_input_reader(variables):
     for variable in variables:
@@ -500,13 +502,18 @@ def clear_transfer_list(clears, transfer):
             clears += 1
             TL_clears = clears
 
-def long_session_rest(session, long):
+def long_session_rest(session, long, general_time_mult):
     if session:
-        global long_session_count
-        if long >= 200:
+        count_res = 0
+        global long_session_count, random_rest, random_rest_time
+        print(random_rest,random_rest_time)
+        if long >= random_rest:
             print("\n\nresting")
-            time.sleep(general_time_mult * 300)
+            time.sleep(general_time_mult * random_rest_time)
             long_session_count = 0
+            set_random_rest()
+            count_res = 1
+    return count_res
 
 def check_for_cancel():
     if keyboard.is_pressed("="):
@@ -516,11 +523,18 @@ def check_for_cancel():
 def check_for_20_sec_pause():
     if keyboard.is_pressed("-"):
         print("keyboard interrupt - pause")
-        time.sleep(general_time_mult * 20)
+        time.sleep(20)
 
+def set_random_rest():
+    global random_rest, random_rest_time
+    random_rest = random.randrange(200, 400, 1)
+    random_rest_time = random.randrange(600, 1200, 1)
+    count_res = 0
+    return count_res
 def set_random_int():
-    global random_int
-    random_int = random.randrange(1, 4, 1)
+    global random_int, random_rest
+    random_int = random.randrange(3, 9, 1)
+
 
 def teamviewer_closer():
     team = pya.locateCenterOnScreen(team_png, grayscale=True, region=(800, 500, 700, 400), confidence=0.8)
@@ -947,6 +961,7 @@ def main(general_time_mult, time_to_load_search):
 
     update_current_price()
 
+    count_res = set_random_rest()
 
 
     if resolution_1080:
@@ -967,11 +982,14 @@ def main(general_time_mult, time_to_load_search):
             print("reached max purchases")
             sys.exit(1)
 
+        if count_res == 1:
+            count_res =  set_random_rest()
+
         teamviewer_closer()  # check for teamviewer popup and close it
 
         total_loops +=1  # increase loops counter
         clear_transfer_list(TL_clears, transfer_list)  # check if transfer list needs clearing then clear if it does
-        long_session_rest(long_session, long_session_count)  # check if it's a long session and then rest as needed
+        count_res = long_session_rest(long_session, long_session_count, general_time_mult)  # check if it's a long session and then rest as needed
         set_random_int()  # set the random value that will be used to sleep
 
 
@@ -1016,6 +1034,7 @@ def listen_for_interrupt():
 
 def runner(general_time_mult, time_to_load_search):
     print("in run")
+
 
     # run both loops at the same time so that a key press can stop the other loop instantly
     loop_process = multiprocessing.Process(target=main, args=(general_time_mult, time_to_load_search))
