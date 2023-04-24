@@ -506,7 +506,6 @@ def long_session_rest(session, long, general_time_mult):
     if session:
         count_res = 0
         global long_session_count, random_rest, random_rest_time
-        print(random_rest,random_rest_time)
         if long >= random_rest:
             print("\n\nresting")
             time.sleep(general_time_mult * random_rest_time)
@@ -943,92 +942,96 @@ rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_
 
 def main(general_time_mult, time_to_load_search):
 
-    print("in main")
-    # all global vairables needed
-    global total_spent, resolution_1440, resolution_1080, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int, minus_buy, minus_bid, plus_buy, plus_bid, buy_limit
+    with open("outputs.txt", "w") as file:
+        sys.stdout = file
 
-    ##test
+        print("in main")
+        # all global vairables needed
+        global total_spent, resolution_1440, resolution_1080, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int, minus_buy, minus_bid, plus_buy, plus_bid, buy_limit
 
-    ## end test
+        ##test
 
-
-
-    past_input_reader([max_loops, buy_limit, current_price, KRSU, only_buy, only_sell, resolution_1080, resolution_1440])
-
-    ensure_mode_selection()
-
-    ensure_resolution()
-
-    update_current_price()
-
-    count_res = set_random_rest()
+        ## end test
 
 
-    if resolution_1080:
-        minus_bid = 500, 770  # coords of minus bid button
-        plus_bid = 970, 770  # coords of plus bid button
-        minus_buy = 500, 880  # coords of minus buy button
-        plus_buy = 970, 880  # coords of plus buy button
+
+        past_input_reader([max_loops, buy_limit, current_price, KRSU, only_buy, only_sell, resolution_1080, resolution_1440])
+
+        ensure_mode_selection()
+
+        ensure_resolution()
+
+        update_current_price()
+
+        count_res = set_random_rest()
 
 
-    if resolution_1440:
-        minus_bid = 830, 800  # coords of minus bid button
-        plus_bid = 1300, 800  # coords of plus bid button
-        minus_buy = 830, 915  # coords of minus buy button
-        plus_buy = 1300, 915  # coords of plus buy button
-
-    while True:
-        if bought >= buy_limit:
-            print("reached max purchases")
-            sys.exit(1)
-
-        if count_res == 1:
-            count_res =  set_random_rest()
-
-        teamviewer_closer(general_time_mult)  # check for teamviewer popup and close it
-
-        total_loops +=1  # increase loops counter
-        clear_transfer_list(TL_clears, transfer_list, general_time_mult)  # check if transfer list needs clearing then clear if it does
-        count_res = long_session_rest(long_session, long_session_count, general_time_mult)  # check if it's a long session and then rest as needed
-        set_random_int()  # set the random value that will be used to sleep
+        if resolution_1080:
+            minus_bid = 500, 770  # coords of minus bid button
+            plus_bid = 970, 770  # coords of plus bid button
+            minus_buy = 500, 880  # coords of minus buy button
+            plus_buy = 970, 880  # coords of plus buy button
 
 
-        check_for_cancel()  # check if user wants to cancel script
-        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-        if loop_count == 3:
-            reset_loop_count() # reset to start over
-            buy_stuff(plus_buy, general_time_mult, time_to_load_search)
-            recurring_prints()
+        if resolution_1440:
+            minus_bid = 830, 800  # coords of minus bid button
+            plus_bid = 1300, 800  # coords of plus bid button
+            minus_buy = 830, 915  # coords of minus buy button
+            plus_buy = 1300, 915  # coords of plus buy button
+
+        while True:
+            if bought >= buy_limit:
+                print("reached max purchases")
+                sys.exit(1)
+
+            if count_res == 1:
+                count_res =  set_random_rest()
+
+            teamviewer_closer(general_time_mult)  # check for teamviewer popup and close it
+
+            total_loops +=1  # increase loops counter
+            clear_transfer_list(TL_clears, transfer_list, general_time_mult)  # check if transfer list needs clearing then clear if it does
+            count_res = long_session_rest(long_session, long_session_count, general_time_mult)  # check if it's a long session and then rest as needed
+            set_random_int()  # set the random value that will be used to sleep
 
 
-        check_for_cancel()  # check if user wants to cancel script
-        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-        if loop_count == 2:
-            buy_stuff(plus_bid, general_time_mult, time_to_load_search)
-            increment_loop_count()
-            recurring_prints()
+            check_for_cancel()  # check if user wants to cancel script
+            check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+            if loop_count == 3:
+                reset_loop_count() # reset to start over
+                buy_stuff(plus_buy, general_time_mult, time_to_load_search)
+                recurring_prints()
 
 
-        check_for_cancel()  # check if user wants to cancel script
-        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-        if loop_count == 1:
-            buy_stuff(minus_buy, general_time_mult, time_to_load_search)
-            increment_loop_count()
-            recurring_prints()
+            check_for_cancel()  # check if user wants to cancel script
+            check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+            if loop_count == 2:
+                buy_stuff(plus_bid, general_time_mult, time_to_load_search)
+                increment_loop_count()
+                recurring_prints()
 
-        check_for_cancel()  # check if user wants to cancel script
-        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-        if loop_count == 0:
-            buy_stuff(minus_bid, general_time_mult, time_to_load_search)
-            increment_loop_count()
-            recurring_prints()
 
+            check_for_cancel()  # check if user wants to cancel script
+            check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+            if loop_count == 1:
+                buy_stuff(minus_buy, general_time_mult, time_to_load_search)
+                increment_loop_count()
+                recurring_prints()
+
+            check_for_cancel()  # check if user wants to cancel script
+            check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+            if loop_count == 0:
+                buy_stuff(minus_bid, general_time_mult, time_to_load_search)
+                increment_loop_count()
+                recurring_prints()
+            file.flush()
 
 # function that can stop process at the press of '=' button at any time
 def listen_for_interrupt():
     while True:
         if keyboard.is_pressed('pause'):
             print("Interrupt received (pressed 'pause' key)")
+            os.startfile("outputs.txt")
             sys.exit(1)
         time.sleep(0.1)
 
