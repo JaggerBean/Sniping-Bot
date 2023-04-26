@@ -542,11 +542,13 @@ def teamviewer_closer(general_time_mult):
         pya.click(1500, 630)  # close teamviewer popup
         time.sleep(general_time_mult * 1)
 
-def krsu_keeps_chacker():
+def krsu_keeps_checker():
     global krsu_keeps, krsu_max_keeps
     if krsu_keeps >= krsu_max_keeps:
         print("reached KRSU max!")
-        sys.exit(1)
+        return True
+    else:
+        return False
 
 def sell(general_time_mult):
     global current_price_real_str, current_price_str, resolution_1080, resolution_1440
@@ -711,22 +713,31 @@ def buy_stuff(button_location, general_time_mult, time_to_load_search):
                     time.sleep(general_time_mult * 0.5)
 
                     if dupe == None:
+                        check = krsu_keeps_checker()
                         rare_str = 'Rare'
-                        if rare_str in data_rarity:
-                            time.sleep(general_time_mult * 0.1)
-                            pya.click(1287, 300)  # exit bio
-                            time.sleep(general_time_mult * 1)
-                            pya.click(1420, 700)  # add to club
-                            time.sleep(general_time_mult * 0.5)
-                            pya.click(125, 190)  # go back
-                            time.sleep(general_time_mult * 0.5)
-                            krsu_keeps += 1
-                        else:
+                        if check:
                             time.sleep(general_time_mult * 0.1)
                             pya.click(1287, 300)  # exit bio
                             time.sleep(general_time_mult * 1)
                             # preform act of selling the player
                             sell(general_time_mult)
+                        else:
+
+                            if rare_str in data_rarity:
+                                time.sleep(general_time_mult * 0.1)
+                                pya.click(1287, 300)  # exit bio
+                                time.sleep(general_time_mult * 1)
+                                pya.click(1420, 700)  # add to club
+                                time.sleep(general_time_mult * 0.5)
+                                pya.click(125, 190)  # go back
+                                time.sleep(general_time_mult * 0.5)
+                                krsu_keeps += 1
+                            else:
+                                time.sleep(general_time_mult * 0.1)
+                                pya.click(1287, 300)  # exit bio
+                                time.sleep(general_time_mult * 1)
+                                # preform act of selling the player
+                                sell(general_time_mult)
                     else:
                         time.sleep(general_time_mult * 0.1)
                         pya.click(1287, 300)  # exit bio
@@ -846,21 +857,29 @@ def buy_stuff(button_location, general_time_mult, time_to_load_search):
 
                     if dupe == None:
                         rare_str = 'Rare'
-                        if rare_str in data_rarity:
-                            time.sleep(general_time_mult * 0.1)
-                            pya.click(1600, 325)  # exit bio
-                            time.sleep(general_time_mult * 1)
-                            pya.click(1750, 800)  # add to club
-                            time.sleep(general_time_mult * 0.5)
-                            pya.click(125, 190)  # go back
-                            time.sleep(general_time_mult * 0.5)
-                            krsu_keeps += 1
-                        else:
+                        check = krsu_keeps_checker()
+                        if check:
                             time.sleep(general_time_mult * 0.1)
                             pya.click(1600, 325)  # exit bio
                             time.sleep(general_time_mult * 1)
                             # preform act of selling the player
                             sell(general_time_mult)
+                        else:
+                            if rare_str in data_rarity:
+                                time.sleep(general_time_mult * 0.1)
+                                pya.click(1600, 325)  # exit bio
+                                time.sleep(general_time_mult * 1)
+                                pya.click(1750, 800)  # add to club
+                                time.sleep(general_time_mult * 0.5)
+                                pya.click(125, 190)  # go back
+                                time.sleep(general_time_mult * 0.5)
+                                krsu_keeps += 1
+                            else:
+                                time.sleep(general_time_mult * 0.1)
+                                pya.click(1600, 325)  # exit bio
+                                time.sleep(general_time_mult * 1)
+                                # preform act of selling the player
+                                sell(general_time_mult)
                     else:
                         time.sleep(general_time_mult * 0.1)
                         pya.click(1600, 325)  # exit bio
