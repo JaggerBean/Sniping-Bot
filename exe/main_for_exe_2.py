@@ -637,7 +637,7 @@ def sell(general_time_mult):
 
 
 
-def buy_stuff(button_location, general_time_mult, time_to_load_search):
+async def buy_stuff(button_location, general_time_mult, time_to_load_search, text, bot, acc, text_noti):
 
     global loop_count, searches, long_session_count, total_earned, missed, bought, transfer_list, total_spent, buy_time, resolution_1440, resolution_1080, krsu_keeps
 
@@ -718,10 +718,18 @@ def buy_stuff(button_location, general_time_mult, time_to_load_search):
                     data_price = pytesseract.image_to_string(thresh, lang='eng', config='--psm 6')
                     data_price = re.sub("[^0-9]", "", data_price)
                     if data_price.isnumeric():
-                        purchases.append(int(data_price))
-                        total_earned = total_earned + 0.95 * current_price - int(data_price)
-                        total_spent += int(data_price)
-                        print("\nBought for:", data_price, "\nTotal possibly earned:", total_earned, "\nTotal spent:", total_spent)
+                        if text_noti:
+                            telegrams = text_notifications(text, bot, acc)
+                            purchases.append(int(data_price))
+                            total_earned = total_earned + 0.95 * current_price - int(data_price)
+                            total_spent += int(data_price)
+                            await telegrams.write(f"\nBought for: {data_price} \nTotal possibly earned: {total_earned} \nTotal spent: {total_spent}")
+                        else:
+                            purchases.append(int(data_price))
+                            total_earned = total_earned + 0.95 * current_price - int(data_price)
+                            total_spent += int(data_price)
+                            print("\nBought for:", data_price, "\nTotal possibly earned:", total_earned, "\nTotal spent:", total_spent)
+
 
                 dupe = pya.locateCenterOnScreen(dupe_png_1080, grayscale=True, region=(1550, 750, 500, 100), confidence=0.8)
                 # print(dupe)
@@ -862,11 +870,19 @@ def buy_stuff(button_location, general_time_mult, time_to_load_search):
                     data_price = pytesseract.image_to_string(thresh, lang='eng', config='--psm 6')
                     data_price = re.sub("[^0-9]", "", data_price)
                     if data_price.isnumeric():
-                        purchases.append(int(data_price))
-                        total_earned = total_earned + 0.95 * current_price - int(data_price)
-                        total_spent += int(data_price)
-                        print("\nBought for:", data_price, "\nTotal possibly earned:", total_earned, "\nTotal spent:",
-                              total_spent)
+                        if text_noti:
+                            telegrams = text_notifications(text, bot, acc)
+                            purchases.append(int(data_price))
+                            total_earned = total_earned + 0.95 * current_price - int(data_price)
+                            total_spent += int(data_price)
+                            await telegrams.write(
+                                f"\nBought for: {data_price} \nTotal possibly earned: {total_earned} \nTotal spent: {total_spent}")
+                        else:
+                            purchases.append(int(data_price))
+                            total_earned = total_earned + 0.95 * current_price - int(data_price)
+                            total_spent += int(data_price)
+                            print("\nBought for:", data_price, "\nTotal possibly earned:", total_earned,
+                                  "\nTotal spent:", total_spent)
 
                 dupe = pya.locateCenterOnScreen(dupe_png, grayscale=True, region=(1550, 750, 500, 100), confidence=0.8)
 
@@ -939,15 +955,24 @@ def buy_stuff(button_location, general_time_mult, time_to_load_search):
 
 
 
-async def recurring_prints(bot, text, acc, text_noti, ):
+async def recurring_prints(bot, text, acc, text_noti ):
     global buy_time, TL_clears
     if text_noti:
-        if searches % 50 == 0:
+        if searches % 2 == 0:
             telegrams = text_notifications(text, bot, acc)
             message = f'''total searches: {searches}\ntotal sniped: {bought}\nTotal possibly earned: {total_earned}\nTotal spent: {total_spent}\nTotal missed: {missed}
             '''
-
+            current_time = time.time()
+            total_time = current_time - start_time
+            delta = timedelta(seconds=total_time)
+            # Extract the hours, minutes, and seconds from the timedelta object
+            hours, remainder = divmod(delta.seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
             if bought >= 1:
+                time_per_bought = total_time / bought
+                time_per_bought_delta = timedelta(seconds=time_per_bought)
+                bought_hours, bought_remainder = divmod(time_per_bought_delta.seconds, 3600)
+                bought_minutes, bought_seconds = divmod(bought_remainder, 60)
                 message += f"average time between purchases: {bought_hours:02d}:{bought_minutes:02d}:{bought_seconds:02d}\n"
                 money_per_hour = total_earned / (total_time / 3600)
                 message += f"CPH: {money_per_hour}\n"
@@ -1014,8 +1039,7 @@ rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_
 
 async def main(general_time_mult, time_to_load_search):
 
-    # with open("outputs.txt", "w") as file:
-    #     sys.stdout = file
+
 
     print("in main")
     # all global vairables needed
@@ -1029,10 +1053,12 @@ async def main(general_time_mult, time_to_load_search):
 
     past_input_reader([max_loops, buy_limit, current_price, KRSU, only_buy, only_sell, resolution_1080, resolution_1440, bot_id, account_id, text_noti])
 
-    print(f' bot {bot_id}')
-    print(f' acc {account_id}')
+    if text_noti:
+        out = text_notifications(text_noti, bot_id, account_id)
+    else:
+        file = open("outputs.txt", "w")
+        sys.stdout = file
 
-    out = text_notifications(text_noti, bot_id, account_id)
 
     # sys.stdout = out
 
@@ -1078,14 +1104,14 @@ async def main(general_time_mult, time_to_load_search):
         check_for_20_sec_pause()  # check if user wants to pause for 20 sec
         if loop_count == 3:
             reset_loop_count() # reset to start over
-            buy_stuff(plus_buy, general_time_mult, time_to_load_search)
+            await buy_stuff(plus_buy, general_time_mult, time_to_load_search, text_noti, bot_id, account_id, text_noti)
             await recurring_prints(bot_id, text_noti, account_id, text_noti)
 
 
         check_for_cancel()  # check if user wants to cancel script
         check_for_20_sec_pause()  # check if user wants to pause for 20 sec
         if loop_count == 2:
-            buy_stuff(plus_bid, general_time_mult, time_to_load_search)
+            await buy_stuff(plus_bid, general_time_mult, time_to_load_search, text_noti, bot_id, account_id, text_noti)
             increment_loop_count()
             await recurring_prints(bot_id, text_noti, account_id, text_noti)
 
@@ -1093,24 +1119,26 @@ async def main(general_time_mult, time_to_load_search):
         check_for_cancel()  # check if user wants to cancel script
         check_for_20_sec_pause()  # check if user wants to pause for 20 sec
         if loop_count == 1:
-            buy_stuff(minus_buy, general_time_mult, time_to_load_search)
+            await buy_stuff(minus_buy, general_time_mult, time_to_load_search, text_noti, bot_id, account_id, text_noti)
             increment_loop_count()
             await recurring_prints(bot_id, text_noti, account_id, text_noti)
 
         check_for_cancel()  # check if user wants to cancel script
         check_for_20_sec_pause()  # check if user wants to pause for 20 sec
         if loop_count == 0:
-            buy_stuff(minus_bid, general_time_mult, time_to_load_search)
+            await buy_stuff(minus_bid, general_time_mult, time_to_load_search, text_noti, bot_id, account_id, text_noti)
             increment_loop_count()
             await recurring_prints(bot_id, text_noti, account_id, text_noti)
-        # file.flush()
+        if not text_noti:
+            file.flush()
 
 # function that can stop process at the press of '=' button at any time
 def listen_for_interrupt():
     while True:
         if keyboard.is_pressed('pause'):
             print("Interrupt received (pressed 'pause' key)")
-            os.startfile("outputs.txt")
+            if not text_noti:
+                os.startfile("outputs.txt")
             sys.exit(1)
         time.sleep(0.1)
 
