@@ -15,6 +15,8 @@ import sys
 from tkinter import scrolledtext
 import os
 from PIL import Image, ImageTk, ImageOps
+import telegram
+import asyncio
 ## Currently not developed
 card_type = "Normal"
 ## END DEV
@@ -29,8 +31,9 @@ KRSU = "KRSU" # keep rares sell uncommons
 ## END MODES
 
 
-
-
+account_id = 'account_id'
+bot_id = 'bot_id'
+text_noti = 'text_noti'
 
 #pytesseract exe location
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -77,8 +80,10 @@ def past_input_reader(variables):
                 value = file.read()
                 if value.lower() == "true" or value.lower() == "false":
                     value = True if value.lower() == "true" else False
-                else:
+                elif value.isnumeric():
                     value = int(value)
+                else:
+                    value = str(value)
                 globals()[variable] = value
                 print(f"{variable} updated to {value}")
         except FileNotFoundError:
@@ -295,7 +300,7 @@ def create_gui():
     output_area.pack(side=tk.LEFT, padx=0, pady=0, fill=tk.BOTH, expand=True)
     sys.stdout = OutputRedirector(output_area)
 
-    variables_to_load = ["only_sell", "only_buy", "KRSU", "buy_limit", "max_loops", "current_price", "resolution_1080", "resolution_1440", "krsu_max_keeps", "long_session", "general_time_mult", "time_to_load_search"]
+    variables_to_load = ["only_sell", "only_buy", "KRSU", "buy_limit", "max_loops", "current_price", "resolution_1080", "text_noti", "resolution_1440", "krsu_max_keeps", "long_session", "general_time_mult", "time_to_load_search"]
 
     read_saved_values(variables_to_load)
 
@@ -377,6 +382,8 @@ def create_gui():
     mode_label.pack()
 
     button_long_session = add_boolean_option(root, "long_session", "Long Session", update_bool)
+
+    button_text_notis = add_boolean_option(root, "text_noti", "Text Notifications", update_bool)
 
     # frame = tk.Frame(root, bg='#302B27')
     # frame.pack(padx=0, pady=0, side='bottom')
@@ -501,6 +508,28 @@ def clear_transfer_list(clears, transfer, general_time_mult):
             transfer_list = 0
             clears += 1
             TL_clears = clears
+
+
+class TelegramStream:
+    def __init__(self, bot, chat_id):
+        self.bot = bot
+        self.chat_id = chat_id
+
+    async def write(self, message):
+        await self.bot.send_message(chat_id=self.chat_id, text=message)
+
+    def flush(self):
+        pass
+
+def text_notifications(text_noti, bot_token, chat):
+    if text_noti:
+        bot = telegram.Bot(token=bot_token)
+        chat_id = chat
+        telegram_stream = TelegramStream(bot, chat_id)
+        print(f"TelegramStream bot: {telegram_stream.bot}")
+        print(f"TelegramStream chat_id: {telegram_stream.chat_id}")
+        return telegram_stream
+
 
 def long_session_rest(session, long, general_time_mult):
     if session:
@@ -910,42 +939,66 @@ def buy_stuff(button_location, general_time_mult, time_to_load_search):
 
 
 
-def recurring_prints():
+async def recurring_prints(bot, text, acc, text_noti, ):
     global buy_time, TL_clears
+    if text_noti:
+        if searches % 50 == 0:
+            telegrams = text_notifications(text, bot, acc)
+            message = f'''total searches: {searches}\ntotal sniped: {bought}\nTotal possibly earned: {total_earned}\nTotal spent: {total_spent}\nTotal missed: {missed}
+            '''
 
-    print('\ntotal searches: ', searches)
-    print('total sniped: ', bought)
-    print("Total possibly earned:", total_earned, "\nTotal spent:", total_spent, "\nTotal missed:", missed)
-    current_time = time.time()
-    total_time = current_time - start_time
-    delta = timedelta(seconds=total_time)
-    # Extract the hours, minutes, and seconds from the timedelta object
-    hours, remainder = divmod(delta.seconds, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    print(f"total time taken: {hours:02d}:{minutes:02d}:{seconds:02d}")
-    # Calculate the average time between purchases
-    if bought >= 1:
-        time_per_bought = total_time / bought
-        time_per_bought_delta = timedelta(seconds=time_per_bought)
-        bought_hours, bought_remainder = divmod(time_per_bought_delta.seconds, 3600)
-        bought_minutes, bought_seconds = divmod(bought_remainder, 60)
-        print(f"average time between purchases: {bought_hours:02d}:{bought_minutes:02d}:{bought_seconds:02d}")
-        money_per_hour = total_earned / (total_time / 3600)
-        print(f"CPH: {money_per_hour}")
-        if len(purchases) >= 1:
-            avg_price = sum(purchases) / len(purchases)
-            print(f"average price per purchase: {avg_price}")
+            if bought >= 1:
+                message += f"average time between purchases: {bought_hours:02d}:{bought_minutes:02d}:{bought_seconds:02d}\n"
+                money_per_hour = total_earned / (total_time / 3600)
+                message += f"CPH: {money_per_hour}\n"
+                if len(purchases) >= 1:
+                    avg_price = sum(purchases) / len(purchases)
+                    message += f"average price per purchase: {avg_price}\n"
 
-    if buy_time != None:
-        since_last = current_time - buy_time
-        delta = timedelta(seconds=since_last - 8)
+            if buy_time is not None:
+                since_last = current_time - buy_time
+                delta = timedelta(seconds=since_last - 8)
+                hours, remainder = divmod(delta.seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                message += f"total time taken: {hours:02d}:{minutes:02d}:{seconds:02d}\ntime since last purchase: {hours:02d}:{minutes:02d}:{seconds:02d}\n"
+
+            message += f"Transfer list has been cleared {TL_clears} times"
+
+            await telegrams.write(message)
+    else:
+        print(f'\n\n\ntotal searches: {searches}')
+        print(f'total sniped: {bought}')
+        print(f'Total possibly earned: {total_earned}\nTotal spent: {total_spent}\nTotal missed: {missed}')
+        current_time = time.time()
+        total_time = current_time - start_time
+        delta = timedelta(seconds=total_time)
         # Extract the hours, minutes, and seconds from the timedelta object
         hours, remainder = divmod(delta.seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
+        print(f"total time taken: {hours:02d}:{minutes:02d}:{seconds:02d}")
+        # Calculate the average time between purchases
+        if bought >= 1:
+            time_per_bought = total_time / bought
+            time_per_bought_delta = timedelta(seconds=time_per_bought)
+            bought_hours, bought_remainder = divmod(time_per_bought_delta.seconds, 3600)
+            bought_minutes, bought_seconds = divmod(bought_remainder, 60)
+            print(f"average time between purchases: {bought_hours:02d}:{bought_minutes:02d}:{bought_seconds:02d}")
+            money_per_hour = total_earned / (total_time / 3600)
+            print(f"CPH: {money_per_hour}")
+            if len(purchases) >= 1:
+                avg_price = sum(purchases) / len(purchases)
+                print(f"average price per purchase: {avg_price}")
 
-        print(f"time since last purchase: {hours:02d}:{minutes:02d}:{seconds:02d}")
+        if buy_time != None:
+            since_last = current_time - buy_time
+            delta = timedelta(seconds=since_last - 8)
+            # Extract the hours, minutes, and seconds from the timedelta object
+            hours, remainder = divmod(delta.seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
 
-    print(f"transfer list has been cleared {TL_clears} times")
+            print(f"time since last purchase: {hours:02d}:{minutes:02d}:{seconds:02d}")
+
+        print(f"transfer list has been cleared {TL_clears} times")
 
 def reset_loop_count():
     global loop_count
@@ -959,91 +1012,98 @@ rare_png,dupe_png,failed_img,no_res_img,won_bid_img,soft_png,team_png,open_fifa_
 
 
 
-def main(general_time_mult, time_to_load_search):
+async def main(general_time_mult, time_to_load_search):
 
-    with open("outputs.txt", "w") as file:
-        sys.stdout = file
+    # with open("outputs.txt", "w") as file:
+    #     sys.stdout = file
 
-        print("in main")
-        # all global vairables needed
-        global total_spent, resolution_1440, resolution_1080, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int, minus_buy, minus_bid, plus_buy, plus_bid, buy_limit
+    print("in main")
+    # all global vairables needed
+    global total_spent, resolution_1440, resolution_1080, total_earned, searches, bought, transfer_list, missed, total_loops, modes, long_session_count, start_time, buy_time, TL_clears, purchases, current_price_real_str, paused, loop_count, current_price, current_price_str, random_int, minus_buy, minus_bid, plus_buy, plus_bid, buy_limit, bot_id, account_id
 
-        ##test
+    ##test
 
-        ## end test
-
-
-
-        past_input_reader([max_loops, buy_limit, current_price, KRSU, only_buy, only_sell, resolution_1080, resolution_1440])
-
-        ensure_mode_selection()
-
-        ensure_resolution()
-
-        update_current_price()
-
-        count_res = set_random_rest()
+    ## end test
 
 
-        if resolution_1080:
-            minus_bid = 500, 770  # coords of minus bid button
-            plus_bid = 970, 770  # coords of plus bid button
-            minus_buy = 500, 880  # coords of minus buy button
-            plus_buy = 970, 880  # coords of plus buy button
+
+    past_input_reader([max_loops, buy_limit, current_price, KRSU, only_buy, only_sell, resolution_1080, resolution_1440, bot_id, account_id, text_noti])
+
+    print(f' bot {bot_id}')
+    print(f' acc {account_id}')
+
+    out = text_notifications(text_noti, bot_id, account_id)
+
+    # sys.stdout = out
+
+    ensure_mode_selection()
+
+    ensure_resolution()
+
+    update_current_price()
+
+    count_res = set_random_rest()
 
 
-        if resolution_1440:
-            minus_bid = 830, 800  # coords of minus bid button
-            plus_bid = 1300, 800  # coords of plus bid button
-            minus_buy = 830, 915  # coords of minus buy button
-            plus_buy = 1300, 915  # coords of plus buy button
-
-        while True:
-            if bought >= buy_limit:
-                print("reached max purchases")
-                sys.exit(1)
-
-            if count_res == 1:
-                count_res =  set_random_rest()
-
-            teamviewer_closer(general_time_mult)  # check for teamviewer popup and close it
-
-            total_loops +=1  # increase loops counter
-            clear_transfer_list(TL_clears, transfer_list, general_time_mult)  # check if transfer list needs clearing then clear if it does
-            count_res = long_session_rest(long_session, long_session_count, general_time_mult)  # check if it's a long session and then rest as needed
-            set_random_int()  # set the random value that will be used to sleep
+    if resolution_1080:
+        minus_bid = 500, 770  # coords of minus bid button
+        plus_bid = 970, 770  # coords of plus bid button
+        minus_buy = 500, 880  # coords of minus buy button
+        plus_buy = 970, 880  # coords of plus buy button
 
 
-            check_for_cancel()  # check if user wants to cancel script
-            check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-            if loop_count == 3:
-                reset_loop_count() # reset to start over
-                buy_stuff(plus_buy, general_time_mult, time_to_load_search)
-                recurring_prints()
+    if resolution_1440:
+        minus_bid = 830, 800  # coords of minus bid button
+        plus_bid = 1300, 800  # coords of plus bid button
+        minus_buy = 830, 915  # coords of minus buy button
+        plus_buy = 1300, 915  # coords of plus buy button
+
+    while True:
+        if bought >= buy_limit:
+            print("reached max purchases")
+            sys.exit(1)
+
+        if count_res == 1:
+            count_res =  set_random_rest()
+
+        teamviewer_closer(general_time_mult)  # check for teamviewer popup and close it
+
+        total_loops +=1  # increase loops counter
+        clear_transfer_list(TL_clears, transfer_list, general_time_mult)  # check if transfer list needs clearing then clear if it does
+        count_res = long_session_rest(long_session, long_session_count, general_time_mult)  # check if it's a long session and then rest as needed
+        set_random_int()  # set the random value that will be used to sleep
 
 
-            check_for_cancel()  # check if user wants to cancel script
-            check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-            if loop_count == 2:
-                buy_stuff(plus_bid, general_time_mult, time_to_load_search)
-                increment_loop_count()
-                recurring_prints()
+        check_for_cancel()  # check if user wants to cancel script
+        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+        if loop_count == 3:
+            reset_loop_count() # reset to start over
+            buy_stuff(plus_buy, general_time_mult, time_to_load_search)
+            await recurring_prints(bot_id, text_noti, account_id, text_noti)
 
 
-            check_for_cancel()  # check if user wants to cancel script
-            check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-            if loop_count == 1:
-                buy_stuff(minus_buy, general_time_mult, time_to_load_search)
-                increment_loop_count()
-                recurring_prints()
+        check_for_cancel()  # check if user wants to cancel script
+        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+        if loop_count == 2:
+            buy_stuff(plus_bid, general_time_mult, time_to_load_search)
+            increment_loop_count()
+            await recurring_prints(bot_id, text_noti, account_id, text_noti)
 
-            check_for_cancel()  # check if user wants to cancel script
-            check_for_20_sec_pause()  # check if user wants to pause for 20 sec
-            if loop_count == 0:
-                buy_stuff(minus_bid, general_time_mult, time_to_load_search)
-                increment_loop_count()
-                recurring_prints()
-            file.flush()
+
+        check_for_cancel()  # check if user wants to cancel script
+        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+        if loop_count == 1:
+            buy_stuff(minus_buy, general_time_mult, time_to_load_search)
+            increment_loop_count()
+            await recurring_prints(bot_id, text_noti, account_id, text_noti)
+
+        check_for_cancel()  # check if user wants to cancel script
+        check_for_20_sec_pause()  # check if user wants to pause for 20 sec
+        if loop_count == 0:
+            buy_stuff(minus_bid, general_time_mult, time_to_load_search)
+            increment_loop_count()
+            await recurring_prints(bot_id, text_noti, account_id, text_noti)
+        # file.flush()
 
 # function that can stop process at the press of '=' button at any time
 def listen_for_interrupt():
@@ -1054,12 +1114,15 @@ def listen_for_interrupt():
             sys.exit(1)
         time.sleep(0.1)
 
+def my_process(gen, times):
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main(gen, times))
 def runner(general_time_mult, time_to_load_search):
     print("in run")
 
 
     # run both loops at the same time so that a key press can stop the other loop instantly
-    loop_process = multiprocessing.Process(target=main, args=(general_time_mult, time_to_load_search))
+    loop_process = multiprocessing.Process(target=my_process, args=(general_time_mult, time_to_load_search))
     interrupt_process = multiprocessing.Process(target=listen_for_interrupt)
 
     loop_process.start()
